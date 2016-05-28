@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Wireless Arduino Control</title>
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+	<script src="assets/nouislider.min.js"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"></head>
+	<link rel="stylesheet" href="./assets/nouislider.min.css"></head>
+	
+  
+  <body>
+  
+	<button type="button" class="btn btn-primary btn-md" id="led_toggle"> Toggle LED </button>
+	<div id="vertical_slider"></div>
+	<div id="horizontal_slider"></div>
+	
+	<style>
+		#main_button{
+			margin-top:1em;
+			margin-left:1em;
+		}
+	</style>
+	
+
+	<script>
+		var socket = io();
+		
+		$("#led_toggle").click(function(){
+			console.log('button clicked');
+			socket.emit('button click',$('#main_button').val());
+			$('#main_button').val('Clicked');
+			return false;
+		})
+		
+		var horizontal_slider = document.getElementById("horizontal_slider");
+		noUiSlider.create(horizontal_slider,{
+				start:[90],
+				range:{
+					'min':[0],
+					'max':[180]
+				}
+		});
+		
+		var vertical_slider = document.getElementById("vertical_slider");
+				noUiSlider.create(vertical_slider,{
+				start:[90],
+				range:{
+					'min':[0],
+					'max':[180]
+				}
+		});
+		
+		
+		socket.on('failure',function(msg){
+				alert(msg);
+		});
+	
+	</script>
+
+
+
+  </body>
+</html>
