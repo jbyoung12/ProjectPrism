@@ -1,9 +1,13 @@
-var app = require('express')();
+var express = require('express');
+var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var PythonShell = require('python-shell');
 
+app.use(express.static(__dirname+'/public'));
+
 app.get('/', function(req, res){
+	console.log(__dirname);
   res.sendFile(__dirname + '/index.html');
 });
 
@@ -14,11 +18,16 @@ io.on('connection', function(socket){
 
 io.on('connection', function(socket){
 
-	socket.on('button click' , function(msg){
-		console.log('Button Clicked');
-		PythonShell.run('main.py',function(err){
-				socket.broadcast.emit('failure: ',err);
-		})	
+	socket.on('valueUpdate' , function(msg){
+		console.log('ValueUpdate! ',msg);
+		console.log(msg.horizantalVal);
+		console.log(msg.verticalVal);
+		console.log(msg.ledState);
+		console.log('\n');
+		//PythonShell.run('main.py',function(err){
+		//		socket.broadcast.emit('failure: ',err);
+		//})
+			
 	});
 
 });
@@ -27,5 +36,5 @@ io.on('connection', function(socket){
 
 
 http.listen(3000, function(){
-  console.log('listening on *:3000');
+  console.log('Listening on port 3000');
 });

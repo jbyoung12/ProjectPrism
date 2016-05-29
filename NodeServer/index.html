@@ -1,56 +1,101 @@
 <!doctype html>
 <html>
   <head>
-    <title>Wireless Arduino Control</title>
-	<script src="/socket.io/socket.io.js"></script>
-	<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
-	<script src="assets/nouislider.min.js"></script>
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"></head>
-	<link rel="stylesheet" href="./assets/nouislider.min.css"></head>
+		<title>Wireless Arduino Control</title>
+		
+		<script src="/socket.io/socket.io.js"></script>
+		<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+		<script src="nouislider.min.js"></script>
+
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"></head>
+		<link rel="stylesheet" href="nouislider.css">
+	</head>
 	
   
   <body>
   
-	<button type="button" class="btn btn-primary btn-md" id="led_toggle"> Toggle LED </button>
-	<div id="vertical_slider"></div>
-	<div id="horizontal_slider"></div>
+	<div id="controls">
+		<button type="button" class="btn btn-primary btn-md" id="led_toggle"> Toggle LED </button>
+		<br>
+		<h2>horizantal control</h2>
+		<div id="horizontal_slider"></div>
+		<br>
+		<h2>vertical control</h2>
+		<div id="vertical_slider"></div>
+	</div>
+
 	
 	<style>
-		#main_button{
-			margin-top:1em;
-			margin-left:1em;
+		#controls{
+			margin-top:1.5em;
+			margin-left:1.5em;
 		}
+		#vertical_slider{
+			height:300px;
+		}
+		#horizontal_slider{
+			width:300px;
+		}
+		
 	</style>
 	
 
 	<script>
 		var socket = io();
+		var LEDState = 0;
+	
+		function ChangeLEDState(){
+			if (LEDState == 0){
+				LEDState = 1
+			}
+			else{
+				LEDState = 0;
+			}
+			return LEDState
+		}
 		
 		$("#led_toggle").click(function(){
-			console.log('button clicked');
-			socket.emit('button click',$('#main_button').val());
-			$('#main_button').val('Clicked');
-			return false;
+			ChangeLEDState();
+			updateVal();
 		})
 		
 		var horizontal_slider = document.getElementById("horizontal_slider");
 		noUiSlider.create(horizontal_slider,{
-				start:[90],
-				range:{
-					'min':[0],
-					'max':[180]
-				}
+			start:[90],
+			range:{
+				'min':[0],
+				'max':[180]
+			}
 		});
+		
+		horizontal_slider.noUiSlider.on('end',function(){
+			updateVal();
+		})
 		
 		var vertical_slider = document.getElementById("vertical_slider");
-				noUiSlider.create(vertical_slider,{
-				start:[90],
-				range:{
-					'min':[0],
-					'max':[180]
-				}
+		noUiSlider.create(vertical_slider,{
+			start:90,
+			orientation:'vertical',
+			range:{
+				'min':0,
+				'max':180
+			}
 		});
 		
+		vertical_slider.noUiSlider.on('end',function(){
+			updateVal();
+		})
+		
+		
+		function updateVal(){
+			socket.emit('valueUpdate',{	
+					horizantalVal : Math.floor(horizontal_slider.noUiSlider.get()),
+					verticalVal : Math.floor(vertical_slider.noUiSlider.get()),
+					ledState : LEDState
+				}
+			);
+			return false;
+		}
 		
 		socket.on('failure',function(msg){
 				alert(msg);

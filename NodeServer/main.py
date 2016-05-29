@@ -8,13 +8,13 @@ bus = smbus.SMBus(1)
 # This is the address we setup in the Arduino Program
 address = 0x04
 
-#bus.write_byte(address,260)
-
-
 def writeData(arrayData):
 	for i in range(len(arrayData)):
 		bus.write_byte(address,arrayData[i]);
-
-array = [1,random.randint(10,170),random.randint(10,170)];
+		
+verticalVal = sys.argv[1]
+horizantalVal = sys.argv[2]
+ledVal = sys.argv[0]
+array = [ledVal,verticalVal,horizantalVal];
 
 writeData(array)
