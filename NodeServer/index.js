@@ -19,14 +19,16 @@ io.on('connection', function(socket){
 io.on('connection', function(socket){
 
 	socket.on('valueUpdate' , function(msg){
-		console.log('ValueUpdate! ',msg);
-		console.log(msg.horizantalVal);
-		console.log(msg.verticalVal);
-		console.log(msg.ledState);
-		console.log('\n');
-		//PythonShell.run('main.py',function(err){
-		//		socket.broadcast.emit('failure: ',err);
-		//})
+		
+		options ={
+			args:[msg.ledState,msg.verticalVal,msg.horizantalVal]	
+		}
+		console.log('Options: ',options)
+		
+		PythonShell.run('main.py',options,function(err,results){
+				socket.broadcast.emit('failure: ',err);
+				console.log(results)
+		})
 			
 	});
 
