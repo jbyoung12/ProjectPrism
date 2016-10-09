@@ -1,9 +1,9 @@
 console.log("js working")
-$.ajax({
+/*$.ajax({
         url: 'http://freegeoip.net/json/',
         type: 'POST',
         dataType: 'jsonp',
         success: function(location) {
             alert(location.ip);
         }
-    });
+    });*/
