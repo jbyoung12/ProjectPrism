@@ -51,8 +51,8 @@ window.onload = function () {
     horiCenter = parseInt(style.getPropertyValue('left'));
     animateTop = vertCenter;
     animateLeft = horiCenter;
+    //animate.style.position = 'absolute';
 };
-
 
 function anim(e){
 
@@ -94,12 +94,24 @@ function anim(e){
         animateTop = animateTop-100;
         animate.style.top = animateTop + 'px';
     }
-    return reset();
+
+animateTop=vertCenter;
+animateLeft=horiCenter;  
 }
 
 function reset() {
 animateTop=vertCenter;
-animateLeft=horiCenter;          // The function returns the product of p1 and p2
+animateLeft=horiCenter;  
+animate.style.left = animateLeft + 'px';
+ animate.style.top = animateTop + 'px';  
 }
-document.onkeydown = anim;
+
+$(document).ready(function(){
+       $(document).keyup(function(){
+        reset();
+    });
+   document.onkeydown = anim;
+
+ 
+});
 
