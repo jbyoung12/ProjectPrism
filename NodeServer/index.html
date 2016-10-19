@@ -2,7 +2,7 @@
 <html>
   <head>
 		<title>Wireless Arduino Control</title>
-		
+
 		<script src="/socket.io/socket.io.js"></script>
 		<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
 		<script src="nouislider.min.js"></script>
@@ -10,10 +10,10 @@
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"></head>
 		<link rel="stylesheet" href="nouislider.css">
 	</head>
-	
-  
+
+
   <body>
-  
+
 	<div id="controls">
 		<button type="button" class="btn btn-primary btn-md" id="led_toggle"> Toggle LED </button>
 		<br>
@@ -24,7 +24,7 @@
 		<div id="vertical_slider"></div>
 	</div>
 
-	
+
 	<style>
 		#controls{
 			margin-top:1.5em;
@@ -36,14 +36,14 @@
 		#horizontal_slider{
 			width:300px;
 		}
-		
+
 	</style>
-	
+
 
 	<script>
 		var socket = io();
 		var LEDState = 0;
-	
+
 		function ChangeLEDState(){
 			if (LEDState == 0){
 				LEDState = 1
@@ -53,12 +53,12 @@
 			}
 			return LEDState
 		}
-		
+
 		$("#led_toggle").click(function(){
 			ChangeLEDState();
 			updateVal();
 		})
-		
+
 		var horizontal_slider = document.getElementById("horizontal_slider");
 		noUiSlider.create(horizontal_slider,{
 			start:[90],
@@ -67,11 +67,11 @@
 				'max':[180]
 			}
 		});
-		
+
 		horizontal_slider.noUiSlider.on('change',function(){
 			updateVal();
 		})
-		
+
 		var vertical_slider = document.getElementById("vertical_slider");
 		noUiSlider.create(vertical_slider,{
 			start:90,
@@ -81,14 +81,14 @@
 				'max':180
 			}
 		});
-		
+
 		vertical_slider.noUiSlider.on('change',function(){
 			updateVal();
 		})
-		
-		
+
+
 		function updateVal(){
-			socket.emit('valueUpdate',{	
+			socket.emit('valueUpdate',{
 					horizantalVal : Math.floor(horizontal_slider.noUiSlider.get()),
 					verticalVal : Math.floor(vertical_slider.noUiSlider.get()),
 					ledState : LEDState
@@ -96,14 +96,57 @@
 			);
 			return false;
 		}
-		
+
 		socket.on('failure',function(msg){
 				alert(msg);
 		});
-	
+
 	</script>
 
 
 
   </body>
+
+
+
+  <head>
+	<meta name="viewport" content="width=320, initial-scale=1"/>
+	<title>jsmpeg streaming</title>
+	<style type="text/css">
+		body {
+			background: #333;
+			text-align: center;
+			margin-top: 10%;
+		}
+		#videoCanvas {
+			/* Always stretch the canvas to 640x480, regardless of its
+			internal size. */
+			width: 640px;
+			height: 480px;
+		}
+	</style>
+</head>
+<body>
+	<!-- The Canvas size specified here is the "initial" internal resolution. jsmpeg will
+		change this internal resolution to whatever the source provides. The size the
+		canvas is displayed on the website is dictated by the CSS style.
+	-->
+	<canvas id="videoCanvas" width="640" height="480">
+		<p>
+			Please use a browser that supports the Canvas Element, like
+			<a href="http://www.google.com/chrome">Chrome</a>,
+			<a href="http://www.mozilla.com/firefox/">Firefox</a>,
+			<a href="http://www.apple.com/safari/">Safari</a> or Internet Explorer 10
+		</p>
+	</canvas>
+	<script type="text/javascript" src="jsmpg.js"></script>
+	<script type="text/javascript">
+		// Setup the WebSocket connection and start the player
+		var client = new WebSocket( 'ws://127.0.0.1:8084/' );
+		var canvas = document.getElementById('videoCanvas');
+		var player = new jsmpeg(client, {canvas:canvas});
+	</script>
+</body>
+
+
 </html>
