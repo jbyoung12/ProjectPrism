@@ -20,7 +20,7 @@ void setup() {
 
   pinMode(JSLUPDOWN, INPUT);
   pinMode(JSLRL, INPUT);
-  pinMode(JSRUPDOWN, INPUT);
+  pinMode(JSRUPDOWN, INPUT);z
   pinMode(JSRRL, INPUT);
 
   pinMode(LED1, OUTPUT);
