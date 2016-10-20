@@ -11,6 +11,7 @@ app.get('/', function(req, res){
   res.sendFile(__dirname + '/index.html');
 });
 
+
 io.on('connection', function(socket){
   console.log('Client connected');
 });
@@ -19,17 +20,17 @@ io.on('connection', function(socket){
 io.on('connection', function(socket){
 
 	socket.on('valueUpdate' , function(msg){
-		
+
 		options ={
-			args:[msg.ledState,msg.verticalVal,msg.horizantalVal]	
+			args:[msg.ledState,msg.verticalVal,msg.horizantalVal]
 		}
 		console.log('Options: ',options)
-		
+
 		PythonShell.run('main.py',options,function(err,results){
 				socket.broadcast.emit('failure: ',err);
 				console.log(results)
 		})
-			
+
 	});
 
 });
