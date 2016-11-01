@@ -130,3 +130,14 @@ input:checked + .slider:before {
   margin-left: auto;
   margin-right: auto;
 }
+
+.gamepadDiv{
+  text-align: center;
+}
+.gamepadViewer{
+  width:400px;
+  height:300px;
+  margin-left:auto;
+  margin-right:auto;
+  position:relative;
+}

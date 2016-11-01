@@ -15,10 +15,12 @@ def writeData(arrayData):
 
 
 ledVal = int(sys.argv[1])
-verticalVal = int(sys.argv[2])
-horizantalVal = int(sys.argv[3])
+rotateCameraVal = float(sys.argv[2])
+cameraSpeedVal = float(sys.argv[3])
+moveSideVal : float(sys.argv[4])
+moveForVal : float(sys.argv[5])
 
-array = [ledVal,verticalVal,horizantalVal];
+array = [ledVal,rotateCameraVal,cameraSpeedVal,moveSideVal,moveForVal];
 print array
 writeData(array)
 

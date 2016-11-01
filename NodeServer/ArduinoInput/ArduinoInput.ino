@@ -1,9 +1,9 @@
-#include <Wire.h> 
+#include <Wire.h>
 #include <Servo.h>
 #define SLAVE_ADDRESS 0x04
 int number = 0;
 int state = 0;
- 
+
 double temp;
 Servo horizontal;
 Servo vertical;
@@ -21,20 +21,20 @@ void setup() {
  Serial.println("Beggining communications");
  //horizontal.attach(9);
  //vertical.attach(10);
- 
+
  Wire.begin(SLAVE_ADDRESS);
- 
+
  // define callbacks for i2c communication
  //Wire.onReceive(receiveData);
  Wire.onReceive(receiveArrayData);
  Wire.onRequest(sendData);
 }
- 
+
 void loop() {
  delay(100);
  temp = GetTemp();
 }
- 
+
 // callback for received data
 void receiveData(int byteCount){
  Serial.println("in recieveData");
@@ -50,7 +50,7 @@ void receiveData(int byteCount){
     state = 0;
    }
   }
- 
+
   if(number==2) {
    number = (int)temp;
   }
@@ -62,7 +62,7 @@ int count = 0;
 const int arrayLen = 3;
 int intArray[arrayLen];
 void receiveArrayData(int numByte){
-  
+
   int currentInt = Wire.read();
   intArray[count] = currentInt;
   count++;
@@ -72,25 +72,25 @@ void receiveArrayData(int numByte){
   }
 
   if (intArray[1] < 67){
-    intArray[1] = 67; 
+    intArray[1] = 67;
   }
-  
+
   analogWrite(10,intArray[1]);
   analogWrite(9,intArray[2]);
   if (intArray[0] ==1){
-    digitalWrite(13,HIGH); 
+    digitalWrite(13,HIGH);
   }
   if (intArray[0]==0){
-    digitalWrite(13,LOW); 
+    digitalWrite(13,LOW);
   }
-} 
+}
 
- 
+
 // callback for sending data
 void sendData(){
  Wire.write(number);
 }
- 
+
 // Get the internal temperature of the arduino
 double GetTemp(void){
  unsigned int wADC;
