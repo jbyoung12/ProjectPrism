@@ -22,43 +22,80 @@ void foward(int inc);
 void setAllStraight();
 void turnLeft(int inc);
 
-int bodyOffset = 25;
-int middleOffset = 15;
-int legOffSet = 15;
+int bodyOffset = 45; 
+int middleOffset = 75;
+int legOffset = -170;
 //----------------------------------------------------//
-int bodyBackRightCenterValue = 95 + bodyOffset;         int bodyBackRightCurrentValue =  bodyBackRightCenterValue;      // back right middle
-int middleBackRightCenterValue = 165 - middleOffset;    int middleBackRightCurrentValue =  middleBackRightCenterValue; // back right middle
-int legBackRightCenterValue = 80 - legOffSet;                        int legBackRightCurrentValue  = legBackRightCenterValue;       // back right leg
-//----------------------------------------------------//
-
-//----------------------------------------------------//
-int bodyFrontRightCenterValue = 90 - bodyOffset;   int bodyFrontRightCurrentValue = bodyFrontRightCenterValue;     // front right middle
-int middleFrontRightCenterValue = 180 - middleOffset;   int middleFrontRightCurrentValue = middleFrontRightCenterValue; // front right middle
-int legFrontRightCenterValue = 40 - legOffSet;                       int legFrontRightCurrentValue = legFrontRightCenterValue ;      // front right leg
+int bodyBackRightCenterValue = 90-5+bodyOffset;         int bodyBackRightCurrentValue =  bodyBackRightCenterValue;      // back right middle
+int middleBackRightCenterValue = 90+20 + middleOffset;    int middleBackRightCurrentValue =  middleBackRightCenterValue; // back right middle
+int legBackRightCenterValue = 180+5 + legOffset;                        int legBackRightCurrentValue  = legBackRightCenterValue;       // back right leg
 //----------------------------------------------------//
 
 //----------------------------------------------------//
-int bodyFrontLeftCenterValue = 90 + bodyOffset;         int bodyFrontLeftCurrentValue = bodyFrontLeftCenterValue;       // front left body
-int middleFrontLeftCenterValue = 180 - middleOffset;    int middleFrontLeftCurrentValue = middleFrontLeftCenterValue; // front left middle
-int legFrontLeftCenterValue = 80 - legOffSet;                       int legFrontLeftCurrentValue = legFrontLeftCenterValue;         // front left leg
+int bodyFrontRightCenterValue = 90-7-bodyOffset;   int bodyFrontRightCurrentValue = bodyFrontRightCenterValue;     // front right middle
+int middleFrontRightCenterValue = 90 + middleOffset;   int middleFrontRightCurrentValue = middleFrontRightCenterValue; // front right middle
+int legFrontRightCenterValue = 180-3+legOffset;                       int legFrontRightCurrentValue = legFrontRightCenterValue ;      // front right leg
 //----------------------------------------------------//
 
 //----------------------------------------------------//
-int bodyBackLeftCenterValue = 90 - bodyOffset;          int bodyBackLeftCurrentValue = bodyBackLeftCenterValue;         //back left middle
-int middleBackLeftCenterValue = 180 - middleOffset;     int middleBackLeftCurrentValue = middleBackLeftCenterValue;   //back left middle
-int legBackLeftCenterValue = 40 - legOffSet;                         int legBackLeftCurrentValue = legBackLeftCenterValue;           // back left leg
+int bodyFrontLeftCenterValue = 90+bodyOffset;         int bodyFrontLeftCurrentValue = bodyFrontLeftCenterValue;       // front left body
+int middleFrontLeftCenterValue = 90+13+middleOffset;    int middleFrontLeftCurrentValue = middleFrontLeftCenterValue; // front left middle
+int legFrontLeftCenterValue = 180+legOffset;                       int legFrontLeftCurrentValue = legFrontLeftCenterValue;         // front left leg
 //----------------------------------------------------//
 
+//----------------------------------------------------//
+int bodyBackLeftCenterValue = 90-10-bodyOffset;          int bodyBackLeftCurrentValue = bodyBackLeftCenterValue;         //back left middle
+int middleBackLeftCenterValue = 90+middleOffset;     int middleBackLeftCurrentValue = middleBackLeftCenterValue;   //back left middle
+int legBackLeftCenterValue = 180+legOffset;                         int legBackLeftCurrentValue = legBackLeftCenterValue;           // back left leg
+//----------------------------------------------------//
+
+//front and rear dir servo sets
+int bodyFrontRightForwardFace = bodyFrontRightCenterValue+(2*bodyOffset)+4;
+int bodyFrontLeftForwardFace = bodyFrontLeftCenterValue-(2*bodyOffset)-5;
+int bodyBackRightRearFace = bodyBackRightCenterValue-(2*bodyOffset)-3;
+int bodyBackLeftRearFace = bodyBackLeftCenterValue+(2*bodyOffset)+5;
+
+//Leg FullExtention
+int legFrontLeftFullExtend = legFrontLeftCenterValue-legOffset;
+int legFrontRightFullExtend = legFrontRightCenterValue-legOffset;
+int legBackLeftFullExtend = legBackLeftCenterValue-legOffset;
+int legBackRightFullExtand = legBackRightCenterValue-legOffset;
+
+//middle FullExtention
+int middleFrontLeftFullExtend =  middleFrontLeftCenterValue-middleOffset;
+int middleFrontRightFullExtend = middleFrontRightCenterValue-middleOffset;
+int middleBackLeftFullExtend = middleBackLeftCenterValue-middleOffset;
+int middleBackRightFullExtend = middleBackRightCenterValue-middleOffset;
+
+//max and min servo ranges limits body
+//bodyFrontRight limits
+int bodyFrontRightMin = -5;
+int bodyFrontRightMax = 180; //didnt push this one all the way, tons of wire in way, could maybe get +5 more
+//bodyFrontLeft limits
+int bodyFrontLeftMin = -9;
+int bodyFrontLeftMax = 175;
+//bodyBackRight limits
+int bodyBackRightMin = -10;
+int bodyBackRightMax = 180;
+//bodyBackLeft limits
+int bodyBackLeftMax = 187;
+int bodyBackLeftMin = -5;
 
 
 void setup() {
-  
+  Serial.begin(9600);
   pwm.begin();
   pwm.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
   delay(2000);
-  //setAllStraight();
-  angle( bodyFrontRight, bodyFrontRightCenterValue);
-  angle( bodyFrontLeft, bodyFrontLeftCenterValue);
+//  setAllStraight();
+//  delay(10000);
+  //extend();
+   //tiptoes();
+  //setForwardRearDir();
+   test();
+
+  //angle( bodyFrontRight, bodyFrontRightCenterValue);
+  //angle( bodyFrontLeft, bodyFrontLeftCenterValue);
 
 }
 
@@ -85,13 +122,19 @@ int numCycles = 36;
 int currentNumCycles = 0;
 void loop() {
 
-  
 
-  //mamba();
+//mamba();
 
 
 //  delay(1000);
-//  setAllStraight();
+ //setAllStraight();
+// for (int i = bodyBackRightCenterValue; i<180  ; i++) {
+//        angle(bodyBackRight,  i);
+//        Serial.println(i);
+//        delay(200);
+//        
+//      }
+ 
 //  delay(1000);
 
 //  if (currentNumCycles < numCycles)
@@ -746,6 +789,90 @@ void mamba() {
 }
 
 
+
+void test(){
+    angle(bodyBackLeft, bodyBackLeftRearFace);
+    angle( legBackLeft, legBackLeftFullExtend-73);
+    delay(1000);
+    angle( middleBackLeft, middleBackLeftCenterValue-30);
+//    for (int i = 0; i<180;i=i+10)
+//    {
+//      delay(1000);
+//      angle( legBackLeft, legBackLeftFullExtend-i);
+//    }
+
+    
+ 
+    //angle( bodyFrontLeft, bodyFrontLeftCenterValue-(2*bodyOffset)-20);
+
+}
+
+void setForwardRearDir(){
+  angle( bodyFrontLeft, bodyFrontLeftForwardFace);
+  angle( legFrontLeft, legFrontLeftCenterValue);
+  angle( middleFrontLeft, middleFrontLeftCenterValue);
+
+  angle( bodyBackRight, bodyBackRightRearFace);
+  angle( legBackRight, legBackRightCenterValue);
+  angle( middleBackRight, middleBackRightCenterValue);
+
+  angle( bodyFrontRight, bodyFrontRightForwardFace);
+  angle( legFrontRight, legFrontRightCenterValue);
+  angle( middleFrontRight, middleFrontRightCenterValue);
+
+  angle( bodyBackLeft, bodyBackLeftRearFace);
+  angle( legBackLeft, legBackLeftCenterValue);
+  angle( middleBackLeft, middleBackLeftCenterValue);
+}
+
+
+//robot should have legs extand fully downwards and achieve max possible height
+void tiptoes(){
+  angle( bodyFrontLeft, bodyFrontLeftCenterValue-bodyOffset);
+  angle( legFrontLeft, legFrontLeftCenterValue-legOffset);
+  angle( middleFrontLeft, 0);
+
+  angle( bodyBackRight, bodyBackRightCenterValue -bodyOffset);
+  angle( legBackRight, legBackRightCenterValue-legOffset);
+  angle( middleBackRight, 0);
+
+  angle( bodyFrontRight, bodyFrontRightCenterValue+bodyOffset);
+  angle( legFrontRight, legFrontRightCenterValue-legOffset);
+  angle( middleFrontRight, 0);
+
+  angle( bodyBackLeft, bodyBackLeftCenterValue+bodyOffset);
+  angle( legBackLeft, legBackLeftCenterValue-legOffset);
+  angle( middleBackLeft, 0);
+
+}
+
+//robot alternates from extend to set straight.
+void pushups(int delayNum){
+ delay(delayNum);
+ extend();
+ delay(delayNum);
+ setAllStraight();
+}
+
+
+
+void extend(){
+  angle( bodyFrontLeft, bodyFrontLeftCenterValue-bodyOffset);
+  angle( legFrontLeft, legFrontLeftCenterValue-legOffset);
+  angle( middleFrontLeft, middleFrontLeftCenterValue-middleOffset);
+
+  angle( bodyBackRight, bodyBackRightCenterValue -bodyOffset);
+  angle( legBackRight, legBackRightCenterValue-legOffset);
+  angle( middleBackRight, middleBackRightCenterValue-middleOffset);
+
+  angle( bodyFrontRight, bodyFrontRightCenterValue+bodyOffset);
+  angle( legFrontRight, legFrontRightCenterValue-legOffset);
+  angle( middleFrontRight, middleFrontRightCenterValue-middleOffset);
+
+  angle( bodyBackLeft, bodyBackLeftCenterValue+bodyOffset);
+  angle( legBackLeft, legBackLeftCenterValue-legOffset);
+  angle( middleBackLeft, middleBackLeftCenterValue-middleOffset);
+}
 
 
 void setAllStraight() {
