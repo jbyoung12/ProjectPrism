@@ -2,6 +2,6 @@
 
 ### Contents
 
-- Quadbot Controller (for rf controller)
+- ~~Quadbot Controller (for rf controller)~~
 - Quadbot code
 - WebServer Code
