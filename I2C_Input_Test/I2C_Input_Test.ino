@@ -56,6 +56,8 @@ int legBackLeftCenterValue = 40 - legOffSet;            int legBackLeftCurrentVa
 
 
 void setup() {  
+  Serial.begin(9600);
+  Serial.println("Beggining setup()");
   pwm.begin();
   pwm.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
   delay(2000);
@@ -64,6 +66,7 @@ void setup() {
   Wire.begin(SLAVE_ADDRESS);
   Wire.onReceive(receiveArrayData);
   Wire.onRequest(sendData);
+  Serial.println("Finished setup()");
 }
 
 
@@ -108,6 +111,9 @@ void loop() {
     currState = 3;
   }
 
+  if (incomingValues[5] == incomingValues[4] == 0){
+    currState = 0;
+  }
   
   switch (currState) {
     
@@ -174,6 +180,7 @@ void receiveArrayData(int numByte){
 
 
 void sendData(){
+  Serial.println("in sendData");
   Wire.write(0); 
 }
 
