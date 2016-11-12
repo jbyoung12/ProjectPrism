@@ -7,13 +7,7 @@ var PythonShell = require('python-shell');
 app.use(express.static(__dirname+'/public'));
 
 app.get('/', function(req, res){
-	console.log(__dirname);
   res.sendFile(__dirname + '/index.html');
-});
-
-
-io.on('connection', function(socket){
-  console.log('Client connected');
 });
 
 
@@ -21,14 +15,16 @@ io.on('connection', function(socket){
 
 	socket.on('valueUpdate' , function(msg){
 
+		console.log();
+
 		options ={
-			args:[msg.ledState,msg.verticalVal,msg.horizantalVal]
+			args:[msg.ledState, msg.autonomousState, msg.horizontalVideoValue,msg.verticalVideoValue,msg.xMovement, msg.yMovement]
 		}
-		console.log('Options: ',options)
+		console.log('Args: ',options.args)
 
 		PythonShell.run('main.py',options,function(err,results){
 				socket.broadcast.emit('failure: ',err);
-				console.log(results)
+				console.log("Arduino Response: "+results)
 		})
 
 	});

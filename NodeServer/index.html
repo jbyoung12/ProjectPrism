@@ -2,135 +2,166 @@
 <html>
   <head>
 		<title>Wireless Arduino Control</title>
-
+    <script type="text/javascript" src="JoyStick/jquery-1.11.2.min.js"></script>
 		<script src="/socket.io/socket.io.js"></script>
-		<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
-		<script src="nouislider.min.js"></script>
+		<script src="Slider/nouislider.js"></script>
+    <script type="text/javascript" src="JoyStick/underscore-min.js"></script>
+    <script type="text/javascript" src="JoyStick/backbone-min.js"></script>
+    <script type="text/javascript" src="JoyStick/joystick_view.js"></script>
+    <script type="text/javascript" src="Main.js"></script>
 
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"></head>
-		<link rel="stylesheet" href="nouislider.css">
+		<link rel="stylesheet" href="Slider/nouislider.css">
+    <link rel="stylesheet" href="Main.css">
+
 	</head>
 
 
   <body>
 
-	<div id="controls">
-		<button type="button" class="btn btn-primary btn-md" id="led_toggle"> Toggle LED </button>
-		<br>
-		<h2>horizantal control</h2>
-		<div id="horizontal_slider"></div>
-		<br>
-		<h2>vertical control</h2>
-		<div id="vertical_slider"></div>
-	</div>
-
-
-	<style>
-		#controls{
-			margin-top:1.5em;
-			margin-left:1.5em;
-		}
-		#vertical_slider{
-			height:300px;
-		}
-		#horizontal_slider{
-			width:300px;
-		}
-
-	</style>
-
-
-	<script>
-		var socket = io();
-		var LEDState = 0;
-
-		function ChangeLEDState(){
-			if (LEDState == 0){
-				LEDState = 1
-			}
-			else{
-				LEDState = 0;
-			}
-			return LEDState
-		}
-
-		$("#led_toggle").click(function(){
-			ChangeLEDState();
-			updateVal();
-		})
-
-		var horizontal_slider = document.getElementById("horizontal_slider");
-		noUiSlider.create(horizontal_slider,{
-			start:[90],
-			range:{
-				'min':[0],
-				'max':[180]
-			}
-		});
-
-		horizontal_slider.noUiSlider.on('change',function(){
-			updateVal();
-		})
-
-		var vertical_slider = document.getElementById("vertical_slider");
-		noUiSlider.create(vertical_slider,{
-			start:90,
-			orientation:'vertical',
-			range:{
-				'min':0,
-				'max':180
-			}  
-		});
-
-		vertical_slider.noUiSlider.on('change',function(){
-			updateVal();
-		})
-
-
-		function updateVal(){
-			socket.emit('valueUpdate',{
-					horizantalVal : Math.floor(horizontal_slider.noUiSlider.get()),
-					verticalVal : Math.floor(vertical_slider.noUiSlider.get()),
-					ledState : LEDState
-				}
-			);
-			return false;
-		}
-
-		socket.on('failure',function(msg){
-				alert(msg);
-		});
-
-	</script>
 
 
 
-  </body>
+
+
+    <div class="container">
+      <div class="page-header js-page-header text-center">
+        <h1>Quadbot Control Panel</h1>
+      </div>
+
+      <div class="row">
+
+        <div class="col-md-4">
+          <h3 class="text-center">
+            Video Feed
+          </h3>
+          <div class="video">
+          </div>
+        </div>
+
+        <div class="col-md-4">
+
+          <div class="row">
+
+            <div class="col-md-2">
+            </div>
+
+            <div class="col-md-8 centered">
+
+
+              <table class="table">
+
+                <h3 class="centered text-center">Robot Status</h3>
+
+                <tbody>
+                  <tr>
+                    <th scope="row">Battery</th>
+                    <td>
+                      <div class="progress centered">
+                        <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 40%">
+                          <span class="sr-only">40% Complete (success)</span>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <th scope="row">Autonomous</th>
+                    <td>
+                       <label class="switch">
+                        <input type="checkbox" id="autonomous_toggle">
+                        <div class="slider round"></div>
+                      </label>
+                      </td>
+                  </tr>
+
+                </tbody>
+              </table>
+
+            </div>
+
+            <div class="col-md-2">
+            </div>
+
+          </div>
 
 
 
-  <head>
-	<meta name="viewport" content="width=320, initial-scale=1"/>
-	<title>jsmpeg streaming</title>
-	<style type="text/css">
-		body {
-			background: #333;
-			text-align: center;
-			margin-top: 10%;
-		}
-		#videoCanvas {
-			/* Always stretch the canvas to 640x480, regardless of its
-			internal size. */
-			width: 640px;
-			height: 480px;
-		}
-	</style>
-</head>
-<body>
+
+        </div>
+
+        <div class="col-md-4">
+          <h3 class="text-center">
+            Controls
+          </h3>
+          <div id="controls">
+            <h4>Horizantal Video</h4>
+              <div id="horizontalVideo"></div>
+            <br>
+            <h4> Vertical Control</h4>
+              <div id="verticalVideo"></div>
+            <br>
+
+            <h4>xMovement</h4>
+              <div id="xMovement"></div>
+            <br>
+            <h4>yMovement</h4>
+              <div id="yMovement"></div>
+            <br>
+
+            <button type="button" class="btn btn-primary btn-md" id="led_toggle"> Toggle LED </button>
+            <br><br>
+            <button type="button" class="btn btn-danger btn-md" id="led_toggle"> Stop </button>
+
+          </div>
+        </div>
+
+
+
+      </div>
+
+
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--
+    <script type="text/html" id="joystick-view">
+    <canvas id="joystickCanvas" width="<%= squareSize %>" height="<%= squareSize %>" style="width: <%= squareSize %>px; height: <%= squareSize %>px;">
+        </canvas>
+    </script>
+    <div id="joystickContent">
+    </div>
+    <div>
+        x: <span id="xVal"></span><br/>
+        y: <span id="yVal"></span><br/>
+    </div>
+-->
+
+
+
+
+
+
+
+
 	<!-- The Canvas size specified here is the "initial" internal resolution. jsmpeg will
 		change this internal resolution to whatever the source provides. The size the
 		canvas is displayed on the website is dictated by the CSS style.
 	-->
+  <!--
 	<canvas id="videoCanvas" width="640" height="480">
 		<p>
 			Please use a browser that supports the Canvas Element, like
@@ -142,11 +173,11 @@
 	<script type="text/javascript" src="jsmpg.js"></script>
 	<script type="text/javascript">
 		// Setup the WebSocket connection and start the player
-		var client = new WebSocket( 'ws://127.0.0.1:8084/' );
+		var client = new WebSocket( 'ws://127.0.0.1:3000/' );
 		var canvas = document.getElementById('videoCanvas');
 		var player = new jsmpeg(client, {canvas:canvas});
 	</script>
-</body>
+  -->
 
-
+  </body>
 </html>
