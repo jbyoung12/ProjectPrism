@@ -3,7 +3,7 @@
 #include <SPI.h>
 #define SERVOMIN  150 // this is the 'minimum' pulse length count (out of 4096)
 #define SERVOMAX  600 // this is the 'maximum' pulse length count (out of 4096)
-#define SLAVE_ADDRESS 0x04
+#define SLAVE_ADDRESS 0x05
 
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
@@ -95,78 +95,98 @@ int counter = 0;
 
 void loop() {
 
+forward(stepForwardInc);
+              stepForwardInc++;
+              if (stepForwardInc == stepForwardMaxInc+1){ stepForwardInc =1; }
+              turnRightInc=1;
+              turnLeftInc=1;
+              stepBackwardInc=1;
+              delay(100);
+              Serial.println("whats going ont");
+
+  /*
+
   // incomingValues = [ ledState,autonomousState, horizontalVideoValue, verticalVideoValue, xMovement, yMovement]
 
-  if (incomingValues[4] > 90){
-    currState = 2;
-  }
-  if (incomingValues[4] < 90){
-    currState = 4;
-  }
+  if (incomingValues[1] == 1){
+    Serial.println("autonomousState == True, doing the mamba");
+    mamba();
+  } 
 
-  if (incomingValues[5] > 90){
-    currState = 1;
-  }
-  if (incomingValues[5] < 90){
-    currState = 3;
-  }
-
-  if (incomingValues[5] == incomingValues[4] == 0){
-    currState = 0;
-  }
-  
-  switch (currState) {
-    
-        case 1:
-          forward(stepForwardInc);
-          stepForwardInc++;
-          if (stepForwardInc == stepForwardMaxInc+1){ stepForwardInc =1; }
-          turnRightInc=1;
-          turnLeftInc=1;
-          stepBackwardInc=1;
-          
-          break;
-    
-        case 2:
-          turnRight(turnRightInc);
-          turnRightInc++;
-          if (turnRightInc == turnRightMaxInc+1){ turnRightInc =1; }
-          stepForwardInc=1;
-          turnLeftInc=1;
-          stepBackwardInc=1;
-          
-          break;
-        
-        case 3:
-          backward(stepBackwardInc);
-          stepBackwardInc++;
-          if (stepBackwardInc == stepBackwardIncMax+1){ stepBackwardInc =1; }
-          stepForwardInc=1;
-          turnLeftInc=1;
-          turnRightInc=1;
-          break;
-        
-        case 4:
-          turnLeft(turnLeftInc);
-          turnLeftInc++;
-          if (turnLeftInc == turnLeftMaxInc+1){ turnLeftInc =1; }
-          stepForwardInc=1;
-          turnRightInc=1;
-          stepBackwardInc=1;
-          break;
-        
-        default:
-          setAllStraight();
+  else {
+      if (incomingValues[4] > 90){
+        currState = 2;
       }
+      if (incomingValues[4] < 90){
+        currState = 4;
+      }
+    
+      if (incomingValues[5] > 90){
+        currState = 1;
+      }
+      if (incomingValues[5] < 90){
+        currState = 3;
+      }
+    
+      if (incomingValues[5] == incomingValues[4] == 0){
+        currState = 0;
+      }
+      
+      switch (currState) {
+        
+            case 1:
+              forward(stepForwardInc);
+              stepForwardInc++;
+              if (stepForwardInc == stepForwardMaxInc+1){ stepForwardInc =1; }
+              turnRightInc=1;
+              turnLeftInc=1;
+              stepBackwardInc=1;
+              
+              break;
+        
+            case 2:
+              turnRight(turnRightInc);
+              turnRightInc++;
+              if (turnRightInc == turnRightMaxInc+1){ turnRightInc =1; }
+              stepForwardInc=1;
+              turnLeftInc=1;
+              stepBackwardInc=1;
+              
+              break;
+            
+            case 3:
+              backward(stepBackwardInc);
+              stepBackwardInc++;
+              if (stepBackwardInc == stepBackwardIncMax+1){ stepBackwardInc =1; }
+              stepForwardInc=1;
+              turnLeftInc=1;
+              turnRightInc=1;
+              break;
+            
+            case 4:
+              turnLeft(turnLeftInc);
+              turnLeftInc++;
+              if (turnLeftInc == turnLeftMaxInc+1){ turnLeftInc =1; }
+              stepForwardInc=1;
+              turnRightInc=1;
+              stepBackwardInc=1;
+              break;
+            
+            default:
+              setAllStraight();
+          }
+      
+        delay(100);
+  }
+*/
   
-    delay(100);
 }
   
 
 
 void receiveArrayData(int numByte){
   int currentInt = Wire.read();
-  Serial.println("incoming int: "+ String(currentInt));
+  Serial.println("Incoming int: "+ String(currentInt));
   
   if (counter == numValues-1){
     counter = 0;
@@ -177,15 +197,10 @@ void receiveArrayData(int numByte){
   currState = currentInt;
 }
 
-
-
 void sendData(){
   Serial.println("in sendData");
   Wire.write(0); 
 }
-
-
-
 
 int middleFinalStepOffset = 37;
 int middleMidStepOffset = 30;
@@ -314,7 +329,6 @@ void turnLeft(int inc) {
 
 }
 
-
 void turnRight(int inc) {
 
   switch (inc) {
@@ -428,7 +442,6 @@ void turnRight(int inc) {
   }
 
 }
-
 
 void backward(int inc) {
 
@@ -560,7 +573,6 @@ void backward(int inc) {
   }
 }
 
-
 void forward(int inc) {
 
   switch (inc) {
@@ -691,7 +703,6 @@ void forward(int inc) {
   }
 }
 
-
 int limiter(int input) {
 
   if (input > 180) {
@@ -705,7 +716,6 @@ int limiter(int input) {
   }
 
 }
-
 
 int delay_time = 10;
 void mamba() {
@@ -737,7 +747,6 @@ void mamba() {
 
 }
 
-
 void setAllStraight() {
 
   angle( bodyFrontLeft, bodyFrontLeftCenterValue);
@@ -756,7 +765,6 @@ void setAllStraight() {
   angle( legBackLeft, legBackLeftCenterValue);
   angle( middleBackLeft, middleBackLeftCenterValue);
 }
-
 
 //leg number, angle
 void angle(int OutputLine, int Angle) {
