@@ -17,11 +17,12 @@ address = 0x04
 def writeData(arrayData):
 	for i in range(len(arrayData)):
 		bus.write_byte(address,arrayData[i]);
+		print "Sent: ",arrayData[i]
 
 array = []
 for i in range(len(sys.argv)-1):
-	print sys.argv[i+1]
+	array.append(sys.argv[i+1])
 
 writeData(array)
 
-print "data sent"
+print "Data sent. All done"

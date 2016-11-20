@@ -11,6 +11,11 @@ app.get('/', function(req, res){
 });
 
 
+pyshell.on('message', function (message) {
+  console.log(message);
+});
+
+
 io.on('connection', function(socket){
 
 	socket.on('valueUpdate' , function(msg){
