@@ -11,11 +11,6 @@ app.get('/', function(req, res){
 });
 
 
-pyshell.on('message', function (message) {
-  console.log('Message recieved from python script: '+message);
-});
-
-
 io.on('connection', function(socket){
 
   console.log("Client connected.")
@@ -36,7 +31,6 @@ io.on('connection', function(socket){
 	});
 
 });
-
 
 
 
