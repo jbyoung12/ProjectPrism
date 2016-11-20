@@ -5,6 +5,8 @@ import time
 import random
 import sys
 
+data = sys.stdin.readlines()
+print "Counted", len(data), "lines."
 
 # [ ledState,autonomousState, horizontalVideoValue, verticalVideoValue, xMovement, yMovement]
 
