@@ -12,15 +12,15 @@ app.get('/', function(req, res){
 
 
 pyshell.on('message', function (message) {
-  console.log(message);
+  console.log('Message recieved from python script: '+message);
 });
 
 
 io.on('connection', function(socket){
 
-	socket.on('valueUpdate' , function(msg){
+  console.log("Client connected.")
 
-		console.log();
+	socket.on('valueUpdate' , function(msg){
 
 		options ={
 			args:[msg.ledState, msg.autonomousState, msg.horizontalVideoValue,msg.verticalVideoValue,msg.xMovement, msg.yMovement]
@@ -29,6 +29,7 @@ io.on('connection', function(socket){
 
 		PythonShell.run('main.py',options,function(err,results){
 				socket.broadcast.emit('failure: ',err);
+        if (err) throw err;
 				console.log("Arduino Response: "+results)
 		})
 
