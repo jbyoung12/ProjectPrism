@@ -82,22 +82,31 @@ int bodyBackRightMax = 180;
 int bodyBackLeftMax = 187;
 int bodyBackLeftMin = -5;
 
+//max servo range limit middle
+    //when set to this range, servos point straight up
+int middleFrontRightMax =183;
+int middleFrontLeftMax =196;
+int middleBackRightMax = 203;
+int middleBackLeftMax =180;
+
 
 void setup() {
   Serial.begin(9600);
   pwm.begin();
   pwm.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
-  delay(2000);
-  //  setAllStraight();
+  //setAllStraight();
   //  delay(10000);
   //extend();
   //tiptoes();
   //setForwardRearDir();
   //   test();
 
-  //angle( bodyFrontRight, bodyFrontRightCenterValue);
-  //angle( bodyFrontLeft, bodyFrontLeftCenterValue);
-  legToPoint(9,4,middleFrontLeft, legFrontLeft);
+   
+  delay(2000);
+  legToPoint(10,8.569,middleFrontLeft, legFrontLeft);
+  delay(3000);
+  legToPoint(12,8.569,middleFrontLeft, legFrontLeft);
+
 }
 
 
@@ -889,6 +898,7 @@ void setAllStraight() {
   angle( bodyFrontRight, bodyFrontRightCenterValue);
   angle( legFrontRight, legFrontRightCenterValue);
   angle( middleFrontRight, middleFrontRightCenterValue);
+  Serial.println(middleFrontRightCenterValue);
 
   angle( bodyBackLeft, bodyBackLeftCenterValue);
   angle( legBackLeft, legBackLeftCenterValue);
@@ -896,94 +906,49 @@ void setAllStraight() {
 }
 
 double R1 = 11.5;
-double R2 = 6.54;
+double R2 = 6.5;
 const float pi = 3.1415926;
 void legToPoint(double x, double y, int servoMiddle, int servoLeg) {
   double p = sqrt(x*x + y*y);
-  double inner = ((p*p) - (R2*R2) - (R1*R1)) / (-2 * R2 * R1);
-  Serial.println(p);
+  double innerFull = acos(((R1*R1)-(p*p) - (R2*R2)) / (-2 * R2 * p));
+  Serial.print("innnerFull: ");
+  Serial.println(innerFull);
   double theta = acos(((p*p) - (R2*R2) - (R1*R1)) / (-2 * R2 * R1));
-  double phi = findPhi2(theta,x);
+  double b = atan(y/x);
+  double phi = innerFull - b;
   Serial.print("Theta: ");
-  Serial.println(theta);
+  Serial.println(theta*180/pi);
   Serial.print("Phi: ");
-  Serial.println(phi);
-  double middleAngle = (pi-(pi/2-phi))*180/pi;
+  Serial.println(phi*180/pi);
+  double middleAngle = getMiddleMax(servoMiddle) -(90-(phi*180/pi));
   double legAngle = theta*180/pi;
   Serial.print("Middle Angle: ");
   Serial.println(middleAngle);
   Serial.print("leg angle: ");
   Serial.println(legAngle);
-  //angle(servoMiddle, middleAngle );
+  angle(servoMiddle, middleAngle );
   angle(servoLeg, legAngle);
 }
 
-double findPhi(double theta,double x){
-  double es = .01;
-  double maxIt = 50;
-  double Xl = 0;
-  int signXl = sgn(xFn(theta,Xl,x));
-  double Xr = pi/2;
-  int signXr = sgn(xFn(theta,Xr,x));
-  double oldXm = 1000;
-  int iter = 0;
-  double Xm = 0;
-  double ea = 100;
-  Serial.print("SgnXr: ");
-  Serial.println(signXr);
-  Serial.print("SgnXl: ");
-  Serial.println(signXl);
-  while(1){
-      Xm = (Xl+Xr)/2;
-      double fnXm = xFn(theta,Xm,x);
-      int signXm = sgn(fnXm);
-      ea = abs(fnXm);
-      iter = iter +1;
-      if(ea <=es|iter >=maxIt){
-        break;
-      }
-      else{
-        if(signXm == signXr){
-          Xr = Xm;
-        } 
-        else{
-          Xl = Xm;
-        }
-      }
+int getMiddleMax(int servoMiddle){
+  if(servoMiddle == middleFrontRight){
+    return middleFrontRightMax;
   }
-  Serial.print("iter: ");
-  Serial.println(iter);
-  Serial.print("ea: ");
-  Serial.println(ea);
-  return Xm;   
-  
-
+  else if(servoMiddle == middleFrontLeft){
+    return middleFrontLeftMax;
+  }
+  else if(servoMiddle == middleBackRight){
+    return middleBackRightMax;
+  }
+  else if(servoMiddle == middleBackLeft){
+    return middleBackLeftMax;
+  }
+  else{
+    Serial.println("Error in getMiddleMax()");
+    return 0;
+  }
 }
 
-double findPhi2(double theta, double x){
-  double distance = 100;
-  int bestAngle = 0;
-  for (int i = 0; i <pi; i++)
-  {
-    double fnX = xFn(theta, i,x);
-    if (fnX <distance){
-      bestAngle = i;
-      distance = fnX;
-    }
-  }
-  Serial.print("bestAngle: ");
-  Serial.print(bestAngle);
-  double bestRevisedAngle = bestAngle;
-  for (int i = 0; i<100; i++){
-    double angle = bestAngle + (i/100);
-    double fnX = xFn(theta, angle,x);
-    if (fnX < distance){
-      bestRevisedAngle =angle;
-      distance = fnX;
-    }
-  }
-  return bestRevisedAngle;
-}
 
 double xFn(double theta,double phi,double x){
   double sol = R2*cos(phi) + R1*sin(theta-90+phi)-x;
