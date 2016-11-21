@@ -916,20 +916,23 @@ void legToPoint(double x, double y, int servoMiddle, int servoLeg) {
   double theta = acos(((p*p) - (R2*R2) - (R1*R1)) / (-2 * R2 * R1));
   double b = atan(y/x);
   double phi = innerFull - b;
-  Serial.print("Theta: ");
-  Serial.println(theta*180/pi);
-  Serial.print("Phi: ");
-  Serial.println(phi*180/pi);
   double middleAngle = getMiddleMax(servoMiddle) -(90-(phi*180/pi));
   double legAngle = theta*180/pi;
-  Serial.print("Middle Angle: ");
-  Serial.println(middleAngle);
-  Serial.print("leg angle: ");
-  Serial.println(legAngle);
+  
+//  Serial.print("Theta: ");
+//  Serial.println(theta*180/pi);
+//  Serial.print("Phi: ");
+//  Serial.println(phi*180/pi);
+//  Serial.print("Middle Angle: ");
+//  Serial.println(middleAngle);
+//  Serial.print("leg angle: ");
+//  Serial.println(legAngle);
+
   angle(servoMiddle, middleAngle );
   angle(servoLeg, legAngle);
 }
 
+//returns the straight vertical max of a given middle servo;
 int getMiddleMax(int servoMiddle){
   if(servoMiddle == middleFrontRight){
     return middleFrontRightMax;
@@ -950,22 +953,6 @@ int getMiddleMax(int servoMiddle){
 }
 
 
-double xFn(double theta,double phi,double x){
-  double sol = R2*cos(phi) + R1*sin(theta-90+phi)-x;
-  return sol;
-}
-int sgn(double input){
-  if (input>0){
-    return 1;
-  }
-  else if (input<0){
-    return -1;
-  }
-  else{
-   // Serial.print("Error in sgn: ");
-    //Serial.println(input);
-  }
-}
 //leg number, angle
 void angle(int OutputLine, int Angle) {
   pwm.setPWM(OutputLine, 0, returnMappedValue(Angle)); // center front right MIDDLE
