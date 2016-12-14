@@ -16,30 +16,36 @@ io.on('connection', function(socket) {
 
   console.log("Client connected.")
 
-  socket.on('valueUpdate', function(msg) {
+  socket.on('valueUpdate', function(msg, callback) {
 
+    console.log("input: " + JSON.stringify(msg));
     options = {
-      args: [msg.ledState, msg.autonomousState, msg.horizontalVideoValue, msg.verticalVideoValue, msg.xMovement, msg.yMovement]
+      args: [msg.autonomousState, msg.horizontalVideoValue, msg.verticalVideoValue, msg.xMovement, msg.yMovement]
     }
     console.log('Args: ', options.args)
 
-
     var pyshell = new PythonShell(pythonScript, options)
+
+    var pyshellErr = "";
+    var pyshellMsg = "Success";
 
     pyshell.send("test \n testline2");
 
     pyshell.on('message', function(message) {
-      console.log(message);
+      console.log("python shell: " + message);
+      pyshellMsg = message;
     });
 
     pyshell.end(function(err) {
       //if (err) throw err;
-      if (err) console.log("Error: " + err);
+      if (err) {
+        console.log("Error: " + err);
+        pyshellErr = err;
+      }
     });
 
-
+    callback(pyshellErr, pyshellMsg);
   });
-
 });
 
 
