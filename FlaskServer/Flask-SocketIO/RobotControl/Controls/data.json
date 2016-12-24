@@ -1,88 +1,97 @@
-{
-  "servos": [
-    {
-      "name: ": "bodyFrontRight",
-      "pinValue": 0,
-      "minValue": 0,
-      "maxValue": 100,
-      "currentValue": 50
-    },
-    {
-      "name: ": "middleFrontRight",
-      "pinValue": 0,
-      "minValue": 0,
-      "maxValue": 100,
-      "currentValue": 50
-    },
-    {
-      "name: ": "legFrontRight",
-      "pinValue": 0,
-      "minValue": 0,
-      "maxValue": 100,
-      "currentValue": 50
-    },
-    {
-      "name: ": "bodyFrontLeft",
-      "pinValue": 0,
-      "minValue": 0,
-      "maxValue": 100,
-      "currentValue": 50
-    },
-    {
-      "name: ": "middleFrontLeft",
-      "pinValue": 0,
-      "minValue": 0,
-      "maxValue": 100,
-      "currentValue": 50
-    },
-    {
-      "name: ": "legFrontLeft",
-      "pinValue": 0,
-      "minValue": 0,
-      "maxValue": 100,
-      "currentValue": 50
-    },
-    {
-      "name: ": "bodyBackRight",
-      "pinValue": 0,
-      "minValue": 0,
-      "maxValue": 100,
-      "currentValue": 50
-    },
-    {
-      "name: ": "middleBackRight",
-      "pinValue": 0,
-      "minValue": 0,
-      "maxValue": 100,
-      "currentValue": 50
-    },
-    {
-      "name: ": "legBackRight",
-      "pinValue": 0,
-      "minValue": 0,
-      "maxValue": 100,
-      "currentValue": 50
-    },
-    {
-      "name: ": "bodyBackLeft",
-      "pinValue": 0,
-      "minValue": 0,
-      "maxValue": 100,
-      "currentValue": 50
-    },
-    {
-      "name: ": "middleBackLeft",
-      "pinValue": 0,
-      "minValue": 0,
-      "maxValue": 100,
-      "currentValue": 50
-    },
-    {
-      "name: ": "legBackLeft",
-      "pinValue": 0,
-      "minValue": 0,
-      "maxValue": 100,
-      "currentValue": 50
-    }
-  ]
+{ 
+	"constants":{
+		"bodyCenterValue": 50,
+		"middleCenterValue":85,
+		"legCenterValue":15,
+		"bodyRange":{
+			"min":0,
+			"max":100
+		},
+		"middleRange":{
+			"min":0,
+			"max":100
+		},
+		"legRange":{
+			"min":0,
+			"max":100
+		}	
+	},
+	
+	"legs":[
+		{
+			"name": "FR",
+			"motors": {
+				"body" : {
+					"pinValue":12,
+					"offset":-12
+				 },
+				 "middle":{
+					"pinValue":13,
+					"offset":0
+				 },
+				 "leg":{
+					"pinValue":14,
+					"offset":0
+				 }
+			}
+		},
+	
+		{
+			"name": "FL",
+			"motors": {
+				"body" : {
+					"pinValue":8,
+					"offset":-12
+				 },
+				 "middle":{
+					"pinValue":9,
+					"offset":-5
+				 },
+				 "leg":{
+					"pinValue":10,
+					"offset":0
+				 }
+			}
+		
+		},
+	
+		{
+			"name": "BR",
+			"motors": {
+				"body" : {
+					"pinValue":4,
+					"offset":-8
+				 },
+				 "middle":{
+					"pinValue":5,
+					"offset":-10
+				 },
+				 "leg":{
+					"pinValue":6,
+					"offset":0
+				 }
+			}
+		},
+	
+		{
+			"name": "BL",
+			"motors": {
+				"body" : {
+					"pinValue":0,
+					"offset":-10
+				 },
+				 "middle":{
+					"pinValue":1,
+					"offset":5
+				 },
+				 "leg":{
+					"pinValue":2,
+					"offset":0
+				 }
+			}
+		}
+	
+	
+	]
+
 }

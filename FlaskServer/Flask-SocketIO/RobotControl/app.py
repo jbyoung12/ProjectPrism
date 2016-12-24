@@ -1,8 +1,8 @@
-
 #!/usr/bin/env python
 from flask import Flask, render_template, session, request,  url_for
 from flask_socketio import SocketIO, emit, join_room, leave_room, \
     close_room, rooms, disconnect
+import time
 from Controls import Robot
 
 '''
@@ -113,7 +113,12 @@ def test_disconnect():
 
 def main():
   print "in main"
-
+  frequency = 50 # 50 Hz creates a 20 ms period, which servos operate with
+  data_file = "Controls/data.json" # path to data file
+  servoMin = 130 # 130 is minumum tick count for duty cycle
+  servoMax = 570 # 570 is maximum tick count for duty cycke
+  quadbot = Robot(frequency,data_file,servoMin, servoMax)
+  quadbot.stand()
 
 if __name__ == '__main__':
   #socketio.run(app, debug=True)
