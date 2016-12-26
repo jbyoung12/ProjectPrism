@@ -1,8 +1,8 @@
-import time
-import json
-from Motor import Motor
 from pwm import PWM
+from I2C import Adafruit_I2C
+from RobotUtil import RobotUtils
 from Leg import Leg
+import time,math,json
 
 class Robot():	
 
@@ -33,7 +33,15 @@ class Robot():
 			constants = data["constants"]
 			for i in range(len(data["legs"])):
 				self.add_leg(data["legs"][i],constants)
-			
+		
+		
+		self.front_left.leg.moveTo(50)
+		self.front_left.leg.moveTo(self.front_left.leg.min)
+		time.sleep(5)
+		self.front_left.leg.moveTo(self.front_left.leg.max)
+		time.sleep(6)
+		
+		
 			
 	# reads dictuanary values from input, creates a Leg object, and adds it to leg variables 
 	def add_leg(self,legData,constants):
@@ -81,9 +89,68 @@ class Robot():
 		else:
 			print "ERROR: LEG CANNOT BE IDENTIFIED"
 	
-		
+	# Refer to stand()
+	def reset(self):
+		self.stand()	
+	
+	# resets legs to default position
 	def stand(self):
 		self.front_left.reset()
 		self.front_right.reset()
 		self.back_left.reset()
 		self.back_right.reset()
+
+	# tester method for Leg.setLegXY
+	def testSetXY(self):
+		
+		print "Enter x value"
+		x = int(raw_input(" >>> "))
+		print "Enter y value"
+		y = int(raw_input(" >>> "))
+		print ""
+		#self.front_left.setLegXY(x,y)
+			
+		
+		'''
+		for x in range(20):		
+			x = x + 1
+			for y in range(20):
+				y = y + 1
+				print "Testing : (",x,",",y,")"
+				self.front_left.setLegXY(x,y)
+				print ""
+				time.sleep(.1)
+			print ""
+			print " ------------------------- "
+			print ""
+		'''
+			
+		self.testSetXY()
+		
+
+
+	# method to develop walking motion
+	def testWalk(self):
+		
+		std_piv_step_body_delta = -25
+		std_piv_step_middle_delta = 50
+		std_piv_step_leg_delta = 5
+		velocity = .001
+		time_delay = .5
+		
+		self.front_left.standardPivotStep(std_piv_step_body_delta, std_piv_step_middle_delta, std_piv_step_leg_delta,velocity,time_delay)
+		time.sleep(time_delay)
+		self.back_right.standardPivotStep(-std_piv_step_body_delta, std_piv_step_middle_delta, std_piv_step_leg_delta,velocity,time_delay)
+		time.sleep(time_delay)
+		
+		leg_extend_body_delta = 25
+		leg_extend_middle_delta =-15
+		leg_extend_leg_delta = 15
+		
+		self.front_right.legExtend( leg_extend_body_delta, leg_extend_middle_delta, leg_extend_leg_delta, velocity, time_delay)
+		time.sleep(time_delay*4)
+		self.reset()
+		self.testWalk()
+
+
+

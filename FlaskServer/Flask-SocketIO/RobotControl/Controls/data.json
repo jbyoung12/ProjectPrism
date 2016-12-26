@@ -23,7 +23,7 @@
 			"motors": {
 				"body" : {
 					"pinValue":12,
-					"offset":-12
+					"offset":-32
 				 },
 				 "middle":{
 					"pinValue":13,
@@ -41,7 +41,7 @@
 			"motors": {
 				"body" : {
 					"pinValue":8,
-					"offset":-12
+					"offset":8
 				 },
 				 "middle":{
 					"pinValue":9,
@@ -60,7 +60,7 @@
 			"motors": {
 				"body" : {
 					"pinValue":4,
-					"offset":-8
+					"offset":12
 				 },
 				 "middle":{
 					"pinValue":5,
@@ -78,7 +78,7 @@
 			"motors": {
 				"body" : {
 					"pinValue":0,
-					"offset":-10
+					"offset":-30
 				 },
 				 "middle":{
 					"pinValue":1,

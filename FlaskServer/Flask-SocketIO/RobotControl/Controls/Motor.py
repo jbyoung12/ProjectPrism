@@ -1,4 +1,5 @@
-from pwm import PWM
+from RobotUtil import RobotUtils
+import time,math,json
 
 class Motor(object):
 
@@ -13,6 +14,7 @@ class Motor(object):
 		self.min = minVal
 		self.max = maxVal
 		self.center_value = centerVal
+		self.value = centerVal
 		
 		self.name = name
 		
@@ -24,38 +26,65 @@ class Motor(object):
 		if val > self.min and val < self.max:
 			self.value = val
 
-		elif val > self.max:
+		elif val >= self.max:
 			self.value = self.max
-			print "val > self.max - Servo name: ",self.name
 
-		else:
+		elif val <= self.min:
 			self.value = self.min
-			print "val < self.min - Servo name: ",self.name
-
-		scaled_value = int(self.scale(self.value, self.min, self.max, self.servo_min,self.servo_max))
+		
+		else:
+			print "something strange is happeneing..."
+		
+		scaled_value = int(RobotUtils.scale(self.value, RobotUtils.MIN_MOTOR_VALUE, RobotUtils.MAX_MOTOR_VALUE,  self.servo_min,self.servo_max))
 		self.pwm.setPWM(self.pin_number, 0, scaled_value)
 
-
-	def moveOffset(self,deltaVal):
-		val = self.value + deltaVal
+	def moveToInT(self,val,t):
+		
+		delta = self.value - val
 		
 		if val > self.min and val < self.max:
 			self.value = val
 
-		elif val > self.max:
+		elif val >= self.max:
 			self.value = self.max
-			print "deltaVal + self.value > self.max - Servo name: ",self.name
 
-		else:
+		elif val <= self.min:
 			self.value = self.min
-			print "deltaVal + self.value < self.min - Servo name: ",self.name
 		
-		scaled_value = int(self.scale(self.value, self.min, self.max, self.servo_min,self.servo_max))
+		else:
+			print "something strange is happeneing..."
+
+		self.moveOffSetInT(delta,t)
+		
+		
+	def moveOffSetInT(self,deltaVal,t):
+		for i in range(int(math.fabs(deltaVal))):
+			self.moveOffset( RobotUtils.PositiveOrNegative(deltaVal) ) 
+			time.sleep(t)
+	
+	
+
+	def moveOffset(self,deltaVal):
+		val = self.value + deltaVal
+
+		if val > self.min and val < self.max:
+			self.value = val
+
+		elif val >= self.max:
+			self.value = self.max
+
+		elif val <= self.min:
+			self.value = self.min
+		
+		else:
+			print "ERROR, very odd indeed"
+		
+		scaled_value = int(RobotUtils.scale(self.value, RobotUtils.MIN_MOTOR_VALUE, RobotUtils.MAX_MOTOR_VALUE, self.servo_min,self.servo_max))
 		self.pwm.setPWM(self.pin_number, 0, scaled_value)
 		
 
-	def scale(self,value, leftMin, leftMax, rightMin, rightMax):
-		return rightMin + ((float(value - leftMin) / float((leftMax - leftMin))) * (rightMax - rightMin))
 
 	def reset(self):
 		self.moveTo(self.center_value)
+
+
