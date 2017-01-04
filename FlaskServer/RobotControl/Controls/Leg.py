@@ -120,11 +120,12 @@ class Leg(object):
 				A_rad = math.acos(A_rad_input)												# Angle between horizon and middle arm in radians
 				A_deg = math.degrees(A_rad)													# ^ in degrees
 
-				midValue = RobotUtils.scale(A_deg,self.middle.min,self.middle.max,0,90)	# scaled value of middle
-				#midValue = midValue+(((RobotUtils.MAX_MOTOR_VALUE - RobotUtils.MIN_MOTOR_VALUE)/180)*90)
+				midValue = RobotUtils.scale(A_deg ,0,90,self.middle.min,self.middle.max)	# scaled value of middle
+				#midValue = midValue + (( (RobotUtils.MAX_MOTOR_VALUE - RobotUtils.MIN_MOTOR_VALUE)/180) * 90)
 				print "corrected midValue: ",midValue
 			
-				legValue = RobotUtils.scale(B_deg,self.leg.min,self.leg.max,0,180)			# scaled value of leg
+				#legValue = RobotUtils.scale(B_deg,self.leg.min,self.leg.max,0,180)			# scaled value of leg
+				legValue = RobotUtils.scale(B_deg, 0,180, self.leg.min,self.leg.max)
 				legValue = legValue 
 				print "corrected legValue: ",legValue
 				print ""
@@ -132,6 +133,7 @@ class Leg(object):
 				# TODO: Calibrate for each leg
 				self.middle.moveTo(midValue)
 				self.leg.moveTo(legValue)  
+			
 			
 			else:
 				print "A_rad_input invaled: ",A_rad_input

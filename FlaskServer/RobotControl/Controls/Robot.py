@@ -24,7 +24,7 @@ class Robot():
 		self.back_right = None
 		
 		self.setup()
-		
+		self.testSetXY()
 		
 	# loads json data and creates Motor objects with add_motor()
 	def setup(self):
@@ -34,12 +34,6 @@ class Robot():
 			for i in range(len(data["legs"])):
 				self.add_leg(data["legs"][i],constants)
 		
-		
-		self.front_left.leg.moveTo(50)
-		self.front_left.leg.moveTo(self.front_left.leg.min)
-		time.sleep(5)
-		self.front_left.leg.moveTo(self.front_left.leg.max)
-		time.sleep(6)
 		
 		
 			
@@ -103,28 +97,29 @@ class Robot():
 	# tester method for Leg.setLegXY
 	def testSetXY(self):
 		
+
 		print "Enter x value"
 		x = int(raw_input(" >>> "))
 		print "Enter y value"
 		y = int(raw_input(" >>> "))
 		print ""
-		#self.front_left.setLegXY(x,y)
+		self.front_left.setLegXY(x,y)
 			
-		
 		'''
 		for x in range(20):		
 			x = x + 1
-			for y in range(20):
-				y = y + 1
-				print "Testing : (",x,",",y,")"
-				self.front_left.setLegXY(x,y)
-				print ""
-				time.sleep(.1)
+			#for y in range(20):
+			y = -5
+			print "Testing : (",x,",",y,")"
+			self.front_left.setLegXY(x,y)
+			print ""
+			time.sleep(.5)
 			print ""
 			print " ------------------------- "
 			print ""
+		
+		time.sleep(1)
 		'''
-			
 		self.testSetXY()
 		
 
