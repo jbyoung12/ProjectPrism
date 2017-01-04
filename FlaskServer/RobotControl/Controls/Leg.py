@@ -1,27 +1,25 @@
-from pwm import PWM
-from I2C import Adafruit_I2C
 from Motor import Motor
 from RobotUtil import RobotUtils
 import time,math,json
 
 class Leg(object):
 
-	def __init__(self,pwm,servo_min,servo_max,name, bodyPin, bodyCenter,bodyMin,bodyMax, middlePin, middleCenter, middleMin,middleMax,    legPin, legCenter, legMin, legMax):
+	def __init__(self, leg_debug, motor_debug, pwm,name, body_pin,	body_min,	body_max,	body_center, mid_horiz_value, 	middle_pin,	middle_min,	middle_max,	middle_offset_to_center, leg_horiz_value, 	leg_pin,	leg_min,	leg_max,	leg_offset_to_center):
 		
+		if leg_debug:
+			print "this should print status of leg, but is not implemented yet."
+			
 		self.pwm = pwm
-		self.servo_min = servo_min
-		self.servo_max = servo_max
-		
+	
 		self.name = name
 		
 		self.body_name = "body"+name
 		self.middle_name = "middle"+name
 		self.leg_name = "leg"+name
 		
-		self.body = Motor(bodyPin,bodyMin,bodyMax,bodyCenter,self.body_name,pwm,servo_min, servo_max)
-		self.middle = Motor(middlePin,middleMin,middleMax, middleCenter,self.middle_name,pwm,servo_min, servo_max)
-		self.leg = Motor(legPin,legMin,legMax, legCenter,self.leg_name,pwm,servo_min, servo_max)
-
+		self.body 	= Motor( motor_debug,	0,					body_pin,	body_min,	body_max,	body_center,				self.body_name,		pwm)
+		self.middle = Motor( motor_debug,	mid_horiz_value, 	middle_pin,	middle_min,	middle_max,	middle_offset_to_center,	self.middle_name,	pwm)
+		self.leg 	= Motor( motor_debug,	leg_horiz_value, 	leg_pin,	leg_min,	leg_max,	leg_offset_to_center,		self.leg_name,		pwm)
 
 	# velocity		- speed of movement (second delay between incrememnts in position)
 	# Standard step in which the middle and leg lift up, the body rotates, and the middle + leg return to starting positions
@@ -88,56 +86,21 @@ class Leg(object):
 		print ""
 		time.sleep(time_delay)
 
+	
+	def setMidAndLegHoriz(self):
+		self.middle.moveToHoriz()
+		self.leg.moveToHoriz()
+	
+	
 	def reset(self):
 		self.body.reset()
 		self.middle.reset()
 		self.leg.reset()
-		
-		
-
+	
 	# setLegToXY moves the tip of the leg to an xy point
 	# x	-  horozontal distance to middle servo nut, must be POSITVE
 	# y	-  vertical distance from the ground to the middle servo   **NEED TO CHECK IF CAN BE NEG**	
 	def setLegXY(self, x, y):
 		
-		R1 = RobotUtils.R1														
-		R2 = RobotUtils.R2
-		pi = math.pi
-		
-		D = math.sqrt( (x**2) + (y**2) )											# Length from body servo to tip of leg
-		
-		B_rad_input = ((D**2)-(R1**2)-(R2**2)) / (-2*D*R2)
-		
-		if B_rad_input >= -1 and B_rad_input <= 1:
-			B_rad = math.acos(B_rad_input )												# Angle between middle arm and leg in rad. Found with Law of Cosines
-			B_deg = math.degrees(B_rad)													# ^ in degrees
-			
-			A_rad_input = (((R1**2)-(D**2)-(R2**2))/(-2*D*R2))
-
-			if A_rad_input >= -1 and A_rad_input <= 1:
-
-				print "A_rad_input: ",A_rad_input
-				A_rad = math.acos(A_rad_input)												# Angle between horizon and middle arm in radians
-				A_deg = math.degrees(A_rad)													# ^ in degrees
-
-				midValue = RobotUtils.scale(A_deg ,0,90,self.middle.min,self.middle.max)	# scaled value of middle
-				#midValue = midValue + (( (RobotUtils.MAX_MOTOR_VALUE - RobotUtils.MIN_MOTOR_VALUE)/180) * 90)
-				print "corrected midValue: ",midValue
-			
-				#legValue = RobotUtils.scale(B_deg,self.leg.min,self.leg.max,0,180)			# scaled value of leg
-				legValue = RobotUtils.scale(B_deg, 0,180, self.leg.min,self.leg.max)
-				legValue = legValue 
-				print "corrected legValue: ",legValue
-				print ""
-		 
-				# TODO: Calibrate for each leg
-				self.middle.moveTo(midValue)
-				self.leg.moveTo(legValue)  
-			
-			
-			else:
-				print "A_rad_input invaled: ",A_rad_input
-		
-		else:
-			print "B_rad_input INVALID: ",B_rad_input
+		print "this method has not been completed"
 

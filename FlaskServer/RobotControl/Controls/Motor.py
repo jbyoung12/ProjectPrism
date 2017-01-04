@@ -1,26 +1,35 @@
 from RobotUtil import RobotUtils
-import time,math,json
+import time,math
 
 class Motor(object):
 
 	'''* servoMin == 125, servoMax == 525ms *'''
 	'''* minVal>=0, maxVal<=100 *'''
-	def __init__(self, pinNumber, minVal=0, maxVal=100, centerVal=50,name="no name", pwm=None,servo_min=125,servo_max = 575):
+	def __init__(self, debug, horiz_value, pinNumber, minVal, maxVal, offset_to_center,name, pwm):
+		
+		if debug:
+			print "Motor Init. name: ",name,"	| minValue: ",minVal,"	| maxValue: ",maxVal,"	| centerVal: ",centerVal
 		
 		self.pin_number = pinNumber
 		
-		self.servo_min = servo_min
-		self.servo_max = servo_max
+		self.servo_min = RobotUtils.SERVO_MIN
+		self.servo_max = RobotUtils.SERVO_MAX
+		
 		self.min = minVal
 		self.max = maxVal
-		self.center_value = centerVal
-		self.value = centerVal
+
+		self.horiz_value = horiz_value
+		self.center_value = horiz_value + offset_to_center
+		self.value = self.center_value
 		
 		self.name = name
 		
 		self.pwm = pwm
 		
 		self.moveTo(self.center_value)
+
+	def moveToHoriz(self):
+		self.moveTo(self.horiz_value)
 
 	def moveTo(self,val):
 		if val > self.min and val < self.max:
@@ -36,7 +45,14 @@ class Motor(object):
 			print "something strange is happeneing..."
 		
 		scaled_value = int(RobotUtils.scale(self.value, RobotUtils.MIN_MOTOR_VALUE, RobotUtils.MAX_MOTOR_VALUE,  self.servo_min,self.servo_max))
-		self.pwm.setPWM(self.pin_number, 0, scaled_value)
+		if scaled_value < self.servo_min:
+			print "error: scaled_value < servo_min for: ",self.name
+		
+		elif scaled_value > self.servo_max:	
+			print "error: scaled_value < servo_min for: ",self.name
+		
+		else:
+			self.pwm.setPWM(self.pin_number, 0, scaled_value)
 
 	def moveToInT(self,val,t):
 		
@@ -63,7 +79,6 @@ class Motor(object):
 			time.sleep(t)
 	
 	
-
 	def moveOffset(self,deltaVal):
 		val = self.value + deltaVal
 
@@ -86,5 +101,6 @@ class Motor(object):
 
 	def reset(self):
 		self.moveTo(self.center_value)
+
 
 

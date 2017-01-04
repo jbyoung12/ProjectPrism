@@ -6,10 +6,12 @@ import time,math,json
 
 class Robot():	
 
-	
-	def __init__(self,frequency=50,file_name='data.json',servo_min = 125, servo_max = 575):
+	def __init__(self,file_name,leg_debug, motor_debug):
 		
-		self.frequency = frequency
+		self.leg_debug = leg_debug
+		self.motor_debug = motor_debug
+		
+		self.frequency = RobotUtils.FREQUENCY
 		self.pwm = PWM()
 		self.pwm.setPWMFreq(self.frequency)
 		
@@ -22,11 +24,13 @@ class Robot():
 		self.front_right = None
 		self.back_left = None
 		self.back_right = None
-		
+
 		self.setup()
-		self.testSetXY()
 		
-	# loads json data and creates Motor objects with add_motor()
+		self.stand()
+		self.testWalk()
+		
+	# loads json data and creates Leg objects with add_leg()
 	def setup(self):
 		with open(self.data_file_name) as data_file:		
 			data = json.load(data_file)
@@ -39,35 +43,30 @@ class Robot():
 			
 	# reads dictuanary values from input, creates a Leg object, and adds it to leg variables 
 	def add_leg(self,legData,constants):
+		
 		leg_name = legData["name"]
+				
+		body_pin 				= legData["motors"]["body"]["pinValue"]
+		body_offset 			= legData["motors"]["body"]["offset"]
+		body_center 			= constants["bodyCenterValue"] + body_offset
+		body_min 				= constants["bodyRange"]["min"]
+		body_max 				= constants["bodyRange"]["max"]
 		
-		body_pin = legData["motors"]["body"]["pinValue"]
-		mid_pin = legData["motors"]["middle"]["pinValue"]
-		leg_pin = legData["motors"]["leg"]["pinValue"]
 		
-		body_offset = legData["motors"]["body"]["offset"]
-		mid_offset = legData["motors"]["middle"]["offset"]
-		leg_offset = legData["motors"]["leg"]["offset"]
+		mid_horiz_value 		=  legData["motors"]["middle"]["horizValue"]
+		middle_pin 				= legData["motors"]["middle"]["pinValue"]
+		middle_min 				= constants["middleRange"]["min"]
+		middle_max 				= constants["middleRange"]["max"]
+		middle_offset_to_center = constants["midOffsetFromHoriz"]
 		
-		body_center = constants["bodyCenterValue"]
-		middle_center = constants["middleCenterValue"]
-		leg_center = constants["legCenterValue"]
+		leg_horiz_value 		= legData["motors"]["leg"]["horizValue"]
+		leg_pin 				= legData["motors"]["leg"]["pinValue"]
+		leg_min 				= constants["legRange"]["min"]
+		leg_max 				= constants["legRange"]["max"]
+		leg_offset_to_center 	= constants["legOffsetFromHoriz"]
 		
-		body_min = constants["bodyRange"]["min"]
-		body_max = constants["bodyRange"]["max"]
-		
-		middle_min = constants["middleRange"]["min"]
-		middle_max = constants["middleRange"]["max"]
-		
-		leg_min = constants["legRange"]["min"]
-		leg_max = constants["legRange"]["max"]
-		
-		bodyCenter = body_center + body_offset
-		middleCenter = middle_center + mid_offset
-		legCenter = leg_center + leg_offset
-		
-		leg = Leg(self.pwm, self.servo_min, self.servo_max,leg_name, body_pin,bodyCenter, body_min, body_max, mid_pin, middleCenter, middle_min, middle_max, leg_pin, legCenter,leg_min, leg_max)
-		
+		leg = Leg(	self.leg_debug, self.motor_debug, self.pwm, leg_name, body_pin,	body_min,	body_max,	body_center, mid_horiz_value, 	middle_pin,	middle_min,	middle_max,	middle_offset_to_center, leg_horiz_value, 	leg_pin,	leg_min,	leg_max,	leg_offset_to_center)
+			
 		if leg_name == "FR":
 			self.front_right = leg
 			
@@ -97,32 +96,42 @@ class Robot():
 	# tester method for Leg.setLegXY
 	def testSetXY(self):
 		
-
-		print "Enter x value"
-		x = int(raw_input(" >>> "))
-		print "Enter y value"
-		y = int(raw_input(" >>> "))
-		print ""
-		self.front_left.setLegXY(x,y)
-			
-		'''
-		for x in range(20):		
-			x = x + 1
-			#for y in range(20):
-			y = -5
-			print "Testing : (",x,",",y,")"
-			self.front_left.setLegXY(x,y)
-			print ""
-			time.sleep(.5)
-			print ""
-			print " ------------------------- "
-			print ""
+		testLeg = self.front_right
 		
-		time.sleep(1)
-		'''
-		self.testSetXY()
+		mid = testLeg.middle
+		leg = testLeg.leg
 		
+		#leg.moveToInT(50,2)
+		midRange = (mid.max - mid.min)
+		print "midRange: ",midRange
+		
+		print "beggining sweep"
+		for i in range(midRange):
+			x = i + mid.min
+			mid.moveTo(x)
+			print "setting :",mid.name," to : ",x
+			time.sleep(.1)
 
+	def setAllHoriz(self):
+		self.front_right.setMidAndLegHoriz()
+		self.front_left.setMidAndLegHoriz()
+		self.back_right.setMidAndLegHoriz()
+		self.back_left.setMidAndLegHoriz()
+		time.sleep(5)
+
+	def setMidsToMin(self):
+		self.front_right.middle.moveTo(self.front_right.middle.min)
+		self.front_left.middle.moveTo(self.front_left.middle.min)
+		self.back_left.middle.moveTo(self.back_left.middle.min)
+		self.back_right.middle.moveTo(self.back_right.middle.min)
+		time.sleep(10)
+		
+	def setMidsToMax(self):
+		self.front_right.middle.moveTo(self.front_right.middle.max)
+		self.front_left.middle.moveTo(self.front_left.middle.max)
+		self.back_left.middle.moveTo(self.back_left.middle.max)
+		self.back_right.middle.moveTo(self.back_right.middle.max)
+		
 
 	# method to develop walking motion
 	def testWalk(self):

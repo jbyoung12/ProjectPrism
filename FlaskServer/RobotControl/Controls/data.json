@@ -1,8 +1,8 @@
 { 
 	"constants":{
 		"bodyCenterValue": 50,
-		"middleCenterValue":85,
-		"legCenterValue":15,
+		"midOffsetFromHoriz":25,
+		"legOffsetFromHoriz":-75,
 		"bodyRange":{
 			"min":0,
 			"max":100
@@ -23,15 +23,16 @@
 			"motors": {
 				"body" : {
 					"pinValue":12,
-					"offset":-32
+					"offset":-35
 				 },
 				 "middle":{
 					"pinValue":13,
-					"offset":0
+					"horizValue":53
 				 },
 				 "leg":{
 					"pinValue":14,
-					"offset":0
+					"offset":10,
+					"horizValue":89
 				 }
 			}
 		},
@@ -41,15 +42,17 @@
 			"motors": {
 				"body" : {
 					"pinValue":8,
-					"offset":8
+					"offset":15
 				 },
 				 "middle":{
 					"pinValue":9,
-					"offset":-5
+					"offset":-5,
+					"horizValue":45
 				 },
 				 "leg":{
 					"pinValue":10,
-					"offset":0
+					"offset":0,
+					"horizValue":95
 				 }
 			}
 		
@@ -60,15 +63,15 @@
 			"motors": {
 				"body" : {
 					"pinValue":4,
-					"offset":12
+					"offset":17
 				 },
 				 "middle":{
 					"pinValue":5,
-					"offset":-10
+					"horizValue":51
 				 },
 				 "leg":{
 					"pinValue":6,
-					"offset":0
+					"horizValue":90
 				 }
 			}
 		},
@@ -82,11 +85,11 @@
 				 },
 				 "middle":{
 					"pinValue":1,
-					"offset":5
+					"horizValue":60
 				 },
 				 "leg":{
 					"pinValue":2,
-					"offset":0
+					"horizValue":95
 				 }
 			}
 		}

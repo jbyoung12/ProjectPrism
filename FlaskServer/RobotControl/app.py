@@ -109,15 +109,13 @@ def test_disconnect():
   print('Client disconnected', request.sid)
 '''
 
-
 def main():
   print "in main"
-  frequency = 50 # 50 Hz creates a 20 ms period, which servos operate with
-  data_file = "Controls/data.json" # path to data file
-  servoMin = 130 # 130 is minumum tick count for duty cycle
-  servoMax = 570 # 570 is maximum tick count for duty cycke
-  quadbot = Robot(frequency,data_file,servoMin, servoMax)
-  quadbot.stand()
+  data_file = "Controls/data.json" 					# data file
+  motor_debug = False								# Dictates whether motors print their status when initilized
+  leg_debug = False									# Dictates whether legs print their status when initialized
+  quadbot = Robot(data_file,leg_debug, motor_debug)	# Create robot object
+													# Set robot to standing position
 
 if __name__ == '__main__':
   #socketio.run(app, debug=True)

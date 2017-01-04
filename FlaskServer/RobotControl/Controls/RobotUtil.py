@@ -5,6 +5,9 @@ class RobotUtils(object):
 	R2 				= 6.5	# length of junction between middle and leg servos
 	MAX_MOTOR_VALUE = 100	# Maximum possible motor value
 	MIN_MOTOR_VALUE = 0		# Minumum possible motor value
+	SERVO_MIN		= 130	# Minumum tick count for duty cycle
+	SERVO_MAX		= 570 	# Maximum tick count for duty cycle
+	FREQUENCY		= 50 	# 50 Hz creates a 20 ms period, which servos operate with
 
 	def __init__(self):
 		self.x = 0
