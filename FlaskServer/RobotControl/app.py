@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from flask import Flask, render_template, session, request, send_from_directory, send_file
 from flask_socketio import SocketIO, emit, join_room, leave_room, close_room, rooms, disconnect
-import time,json,subprocess
+import time,json,subprocess,picamera
 from bColors import bcolors
 #from Controls import Robot
 
@@ -13,6 +13,8 @@ socketio = SocketIO(app, async_mode=async_mode)
 thread = None
 image_delay_time = 1
 
+camera = picamera.PiCamera()
+n = 5
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -21,12 +23,14 @@ def index():
 def background_thread():
     global image_delay_time
     while True:
-        subprocess.call(["raspistill -vf -hf -o $(pwd)+image.png", i]
-        socketio.sleep(image_delay_time)
+        os.system("raspistill -o image.png")
+        
+        time.sleep(image_delay_time)
         with open("image.png", "rb") as f:
             data = f.read()
             print "sending image"
             socketio.emit('image', { 'image': True, 'buffer': data.encode("base64") });
+            n += 1
 
 @socketio.on('valueUpdate')
 def valueUpdateHandler(message):
