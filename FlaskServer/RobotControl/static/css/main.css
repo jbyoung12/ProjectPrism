@@ -66,6 +66,21 @@
 }
 
 
+/* video input */
+
+#video_display {
+  width: 300px;
+  height: 300px;
+  border: 1px solid black;
+}
+
+#video_img {
+  height: 300px;
+  width: 300px;
+  border: 1px solid black;
+}
+
+
 /* Table */
 
 .table>tbody>tr>th {

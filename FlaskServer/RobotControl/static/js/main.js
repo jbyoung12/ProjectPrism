@@ -246,6 +246,20 @@ function send_data() {
   return false;
 }
 
+
+var ctx = null;
+$(document).ready(function() {
+  ctx = document.getElementById('video_img'); //.getContext('2d');
+})
+socket.on("image", function(info) {
+  if (info.image) {
+    //var img = new Image();
+    ctx.src = 'data:image/jpeg;base64,' + info.buffer;
+    //ctx.drawImage(img, 0, 0);
+  }
+});
+
+
 function hideElement(id) {
   $("#" + id).hide();
   //document.getElementById(id).style.display = "none";
