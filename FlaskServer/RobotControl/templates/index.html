@@ -2,117 +2,151 @@
 <html>
 
 <head>
-  <title>Flask-SocketIO Test</title>
-  <script type="text/javascript" src="//code.jquery.com/jquery-1.4.2.min.js"></script>
-  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.5/socket.io.min.js"></script>
 
+  <title>Wireless Arduino Control</title>
 
+  <script type="text/javascript" src="/static/js/jquery.min.js"></script>
+  <script src="/static/js/socket.io.js"></script>
+  <script src="/static/js/nouislider.js"></script>
+  <script type="text/javascript" src="/static/js/main.js"></script>
 
-  <script type="text/javascript" src="{{ url_for('static', filename = 'test.js') }}">
-  </script>
+  <link rel="stylesheet" href="/static/css/nouislider.css">
+  <link rel="stylesheet" href="/static/css/main.css">
+  <link rel="stylesheet" href="/static/css/bootstrap.css">
+  <link rel="stylesheet" href="/static/css/button.css">
 
-  <script type="text/javascript" charset="utf-8">
-    $(document).ready(function() {
-      // Use a "/test" namespace.
-      // An application can open a connection on multiple namespaces, and
-      // Socket.IO will multiplex all those connections on a single
-      // physical channel. If you don't care about multiple channels, you
-      // can set the namespace to an empty string.
-      namespace = '/test';
-
-      // Connect to the Socket.IO server.
-      // The connection URL has the following format:
-      //     http[s]://<domain>:<port>[/<namespace>]
-      var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
-
-      // Event handler for new connections.
-      // The callback function is invoked when a connection with the
-      // server is established.
-      socket.on('connect', function() {
-        socket.emit('my_event', {
-          data: 'I\'m connected!'
-        });
-      });
-
-      // Event handler for server sent data.
-      // The callback function is invoked whenever the server emits data
-      // to the client. The data is then displayed in the "Received"
-      // section of the page.
-      socket.on('my_response', function(msg) {
-        $('#log').append('<br>' + $('<div/>').text('Received #' + msg.count + ': ' + msg.data).html());
-      });
-
-      // Interval function that tests message latency by sending a "ping"
-      // message. The server then responds with a "pong" message and the
-      // round trip time is measured.
-      var ping_pong_times = [];
-      var start_time;
-      window.setInterval(function() {
-        start_time = (new Date).getTime();
-        socket.emit('my_ping');
-      }, 1000);
-
-      // Handler for the "pong" message. When the pong is received, the
-      // time from the ping is stored, and the average of the last 30
-      // samples is average and displayed.
-      socket.on('my_pong', function() {
-        var latency = (new Date).getTime() - start_time;
-        ping_pong_times.push(latency);
-        ping_pong_times = ping_pong_times.slice(-30); // keep last 30 samples
-        var sum = 0;
-        for (var i = 0; i < ping_pong_times.length; i++)
-          sum += ping_pong_times[i];
-        $('#ping-pong').text(Math.round(10 * sum / ping_pong_times.length) / 10);
-      });
-
-      // Handlers for the different forms in the page.
-      // These accept data from the user and send it to the server in a
-      // variety of ways
-      $('form#emit').submit(function(event) {
-        socket.emit('my_event', {
-          data: $('#emit_data').val()
-        });
-        return false;
-      });
-      $('form#broadcast').submit(function(event) {
-        socket.emit('my_broadcast_event', {
-          data: $('#broadcast_data').val()
-        });
-        return false;
-      });
-      $('form#join').submit(function(event) {
-        socket.emit('join', {
-          room: $('#join_room').val()
-        });
-        return false;
-      });
-      $('form#leave').submit(function(event) {
-        socket.emit('leave', {
-          room: $('#leave_room').val()
-        });
-        return false;
-      });
-      $('form#send_room').submit(function(event) {
-        socket.emit('my_room_event', {
-          room: $('#room_name').val(),
-          data: $('#room_data').val()
-        });
-        return false;
-      });
-      $('form#close').submit(function(event) {
-        socket.emit('close_room', {
-          room: $('#close_room').val()
-        });
-        return false;
-      });
-      $('form#disconnect').submit(function(event) {
-        socket.emit('disconnect_request');
-        return false;
-      });
-    });
-  </script>
 </head>
 
+<body>
+  <div class="container">
+    <div class="page-header js-page-header text-center">
+      <h1>Quadbot Control Panel</h1>
+    </div>
+
+    <div class="row">
+
+      <div class="col-md-4">
+        <h3 class="text-center">
+            Video Feed
+          </h3>
+        <div class="video">
+        </div>
+      </div>
+
+      <div class="col-md-4">
+
+
+        <div class="row">
+          <div class="col-md-1"></div>
+
+          <div class="col-md-10 centered">
+            <table class="table">
+              <h3 class="centered text-center">Robot Status</h3>
+
+              <!-- Robot Status inserted here by initializeStatus() in main.js -->
+              <tbody id="statusParent">
+
+              </tbody>
+
+            </table>
+          </div>
+          <div class="col-md-2 ">
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4 ">
+        <h2 class="text-center ">Controls</h2>
+
+        <div class=" " id="sliderControls">
+          <h4>slider controls</h4>
+          <h4>Horizantal Video</h4>
+          <div id="horizontalVideo"></div>
+          <br>
+          <h4> Vertical Control</h4>
+          <div id="verticalVideo"></div>
+          <br>
+          <h4>xMovement</h4>
+          <div id="xMovement"></div>
+          <br>
+          <h4>yMovement</h4>
+          <div id="yMovement"></div>
+        </div>
+
+        <div id="gamepadControls">
+          <h4>gamepade controls</h4>
+
+          <table class="table">
+            <!-- gamepad progress bars -->
+            <tbody>
+              <tr>
+                <td>
+                  <div class="row">
+                    <div class="col-md-4">
+                      <h5>LX</h5></div>
+                    <div class="col-md-8">
+                      <div class="progress">
+                        <div id="gamepad_x_movement" class="progress-bar progress-bar-success" style="width: 50%"></div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+                  <div class="row">
+                    <div class="col-md-4">
+                      <h5>LY</h5></div>
+                    <div class="col-md-8">
+                      <div class="progress">
+                        <div id="gamepad_y_movement" class="progress-bar progress-bar-success" style="width: 50%"></div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+                  <div class="row">
+                    <div class="col-md-4">
+                      <h5>RX</h5></div>
+                    <div class="col-md-8">
+                      <div class="progress">
+                        <div id="gamepad_horizontal_video" class="progress-bar progress-bar-success" style="width: 50%"></div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+                  <div class="row">
+                    <div class="col-md-4">
+                      <h5>RY</h5></div>
+                    <div class="col-md-8">
+                      <div class="progress">
+                        <div id="gamepad_vertical_video" class="progress-bar progress-bar-success" style="width: 50%"></div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <br>
+        <div id="permenant_controls">
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+</body>
+<!--
 <body>
   <h1>Robot Control</h1>
   <p>Async mode is: <b>{{ async_mode }}</b></p>
@@ -149,5 +183,6 @@
   <h2>Receive:</h2>
   <div id="log"></div>
 </body>
+-->
 
 </html>
