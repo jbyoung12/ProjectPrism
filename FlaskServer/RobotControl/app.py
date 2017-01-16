@@ -24,7 +24,6 @@ def background_thread():
     global image_delay_time
     while True:
         os.system("raspistill -o image.png")
-        
         time.sleep(image_delay_time)
         with open("image.png", "rb") as f:
             data = f.read()
