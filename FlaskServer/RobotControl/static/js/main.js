@@ -67,7 +67,7 @@ var data = {
     ],
     "gamepad": {
       "gamepadConnected": false,
-      "poll_time": 15,
+      "poll_time": 100,
       "gamepadVisible": false,
       "leastSignificantValidChange": 5,
       "inputs": [{
@@ -130,11 +130,23 @@ function gamepadLoop() {
 
       newValue = map_range(gamepad.axes[currentAxisNum], -1, 1, 0, 100);
 
+      // if value is greater than threshold we change the bars
+      if (Math.abs(newValue - 50) > leastSignificantValidChange) {
+        document.getElementById(data.controls.gamepad.inputs[i].elementId).setAttribute("style", "width:" + newValue + "%");
+      } else {
+        document.getElementById(data.controls.gamepad.inputs[i].elementId).setAttribute("style", "width:50%");
+      }
+
+      // we sent the value of the data regardless of whether its significant to let the robot interpret
+      data.controls.gamepad.inputs[i].value = newValue;
+      send_data();
+      //}
+      /*
       if (valuesChanged(oldValue, newValue, leastSignificantValidChange)) {
         document.getElementById(data.controls.gamepad.inputs[i].elementId).setAttribute("style", "width:" + newValue + "%");
         data.controls.gamepad.inputs[i].value = newValue;
         send_data();
-      }
+      }*/
     }
 
   } else {
@@ -205,6 +217,7 @@ function reportOnGamepad() {
 
 
 function initializeSliders() {
+
   for (var i = 0; i < data.controls.sliders.length; i++) {
     slider = document.getElementById(data.controls.sliders[i].id);
     noUiSlider.create(slider, {
@@ -214,10 +227,15 @@ function initializeSliders() {
         'max': [data.controls.sliders[i].data.max]
       }
     });
-    slider.noUiSlider.on('change', function() {
-      send_data();
-    });
+
+    window.setInterval(function() {
+      if (!data.controls.gamepad.gamepadConnected) {
+        send_data();
+      }
+    }, data.controls.gamepad.poll_time);
+
   }
+
 }
 
 
@@ -241,7 +259,7 @@ function send_data() {
   socket.emit('valueUpdate', {
     data: sendData
   }, function(callbackData) {
-    console.log("Server Response | callbackData:" + callbackData);
+    //console.log("Server Response | callbackData:" + callbackData);
   });
   return false;
 }

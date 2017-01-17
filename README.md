@@ -19,3 +19,9 @@ Leg.py  takes commands from Robot class and commands motors <br>
 Motor.py commands individual Servos <br>
 RobotUtil.py  holds universal variables and static methods <br>
 pwm.py | I2c.py  provide  i2c interface  <br>
+
+## todo
+<ul>
+  <li>the web interface should only send significant data - currently the js polls the gamecontroller/sliders every x milliseconds and sends data, regardless of whether of the data will be useful to the robot. instead, the js should only send on value change, and the robot will understand nothing has changed without new data</li>
+
+</ul>
