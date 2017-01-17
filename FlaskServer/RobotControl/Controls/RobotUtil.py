@@ -23,5 +23,6 @@ class RobotUtils(object):
 			return 0
 
 	@staticmethod
+	#left is input range, right is output range
 	def scale(value, leftMin, leftMax, rightMin, rightMax):
 		return rightMin + ((float(value - leftMin) / float((leftMax - leftMin))) * (rightMax - rightMin))

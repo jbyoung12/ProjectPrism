@@ -64,7 +64,9 @@ class Leg(object):
 	# velocity		- speed of movement (second delay between incrememnts in position)
 	# Specific motion in which the robot lifts the middle and leg, pivots the body and drops the leg in front of the robot
 	def legExtend(self, body_delta, middle_delta, leg_delta, velocity, time_delay):
+		middle_raise= 30
 		
+		self.middle.moveOffset(middle_raise)
 		print "in Leg Extend"
 		print ""
 		
@@ -81,7 +83,7 @@ class Leg(object):
 		time.sleep(time_delay)
 		
 		print "moving leg"
-		self.middle.moveOffSetInT(middle_delta, velocity)
+		self.middle.moveOffSetInT(middle_delta - middle_raise, velocity)
 		print "done moving leg"
 		print ""
 		time.sleep(time_delay)
@@ -103,4 +105,36 @@ class Leg(object):
 	def setLegXY(self, x, y):
 		
 		print "this method has not been completed"
+		
+	def standardPivotStepWithMidMovement(self,body_delta,middle_delta,leg_delta,velocity,time_delay):
+		
+		middlePickUp = 40
+		
+		print "in standardPivorStep"
+		print ""
+		
+		print "moving middle"
+		self.middle.moveOffSetInT(middlePickUp, velocity)
+		print "done moving middle"
+		print ""
+		time.sleep(time_delay)
+		
+		
+		
+		print "moving body"
+		self.body.moveOffSetInT(body_delta,velocity)
+		print "done moving body"
+		print ""
+		time.sleep(time_delay)
+		
+		print "moving leg"
+		self.leg.moveOffSetInT(leg_delta,velocity)
+		print "done moving leg"
+		print ""
+		time.sleep(time_delay)
+		
+		self.middle.moveOffset(middle_delta - middlePickUp)
+		print ""
+		
+	
 

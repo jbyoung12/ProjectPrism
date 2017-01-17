@@ -23,7 +23,7 @@
 			"motors": {
 				"body" : {
 					"pinValue":12,
-					"offset":-35
+					"offset":-29
 				 },
 				 "middle":{
 					"pinValue":13,
@@ -42,12 +42,12 @@
 			"motors": {
 				"body" : {
 					"pinValue":8,
-					"offset":15
+					"offset":23
 				 },
 				 "middle":{
 					"pinValue":9,
 					"offset":-5,
-					"horizValue":45
+					"horizValue":55
 				 },
 				 "leg":{
 					"pinValue":10,
@@ -63,15 +63,15 @@
 			"motors": {
 				"body" : {
 					"pinValue":4,
-					"offset":17
+					"offset":27
 				 },
 				 "middle":{
 					"pinValue":5,
-					"horizValue":51
+					"horizValue":53
 				 },
 				 "leg":{
 					"pinValue":6,
-					"horizValue":90
+					"horizValue":95
 				 }
 			}
 		},
@@ -81,7 +81,7 @@
 			"motors": {
 				"body" : {
 					"pinValue":0,
-					"offset":-30
+					"offset":-25
 				 },
 				 "middle":{
 					"pinValue":1,
