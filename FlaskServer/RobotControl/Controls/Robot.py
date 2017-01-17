@@ -25,6 +25,7 @@ class Robot():
 		self.setup()
 
 		self.stand()
+		time.sleep(3)
 		self.testWalk()
 
 	# loads json data and creates Leg objects with add_leg()
@@ -133,14 +134,17 @@ class Robot():
 	# method to develop walking motion
 	def testWalk(self):
 
-		std_piv_step_body_delta = -25
+		std_piv_step_body_delta = -20
 		std_piv_step_middle_delta = 50
 		std_piv_step_leg_delta = 5
-		velocity = .001
-		time_delay = .5
-
-		self.front_left.standardPivotStep(std_piv_step_body_delta, std_piv_step_middle_delta, std_piv_step_leg_delta,velocity,time_delay)
+		velocity = .01
+		time_delay = .025
+		
+		print "front left pivot step"
+		self.front_left.standardPivotStep(std_piv_step_body_delta, std_piv_step_middle_delta, std_piv_step_leg_delta,velocity,time_delay*.01)
 		time.sleep(time_delay)
+		
+		print "back right pivot step"
 		self.back_right.standardPivotStep(-std_piv_step_body_delta, std_piv_step_middle_delta, std_piv_step_leg_delta,velocity,time_delay)
 		time.sleep(time_delay)
 
@@ -148,6 +152,7 @@ class Robot():
 		leg_extend_middle_delta =-5
 		leg_extend_leg_delta = 28
 
+		print "front right leg extend"
 		self.front_right.legExtend( leg_extend_body_delta, leg_extend_middle_delta, leg_extend_leg_delta, velocity, time_delay)
 		time.sleep(time_delay)
 		
@@ -160,6 +165,7 @@ class Robot():
 		leg_condense_BLmiddle_delta = -10/splitNum
 		leg_condense_BLleg_delta = 28/splitNum
 		
+		print "condense forward right"
 		for x in range(0, splitNum):
 			self.front_left.body.moveOffset(leg_condense_FLbody_delta)
 			self.back_right.body.moveOffset(leg_condense_BRbody_delta)
@@ -173,11 +179,15 @@ class Robot():
 		leg_step_BLmiddle_delta = 30
 		leg_step_BLleg_delta = -28
 		time.sleep(time_delay)
+		
+		print "back left standard pivot step with mid offset"
 		self.back_left.standardPivotStepWithMidMovement(leg_step_BLbody_delta, leg_step_BLmiddle_delta, leg_step_BLleg_delta,velocity,time_delay)
 		
 		leg_step_FRbody_delta = -40
 		leg_step_FRmiddle_delta = 5
 		leg_step_FRleg_delta = 28
+		
+		print "front left standard pivot step with mid movement"
 		self.front_left.standardPivotStepWithMidMovement(leg_step_FRbody_delta, leg_step_FRmiddle_delta, leg_step_FRleg_delta, velocity,time_delay)
 		time.sleep(time_delay)
 		
@@ -193,6 +203,8 @@ class Robot():
 		backRightMiddleSwing = -10/splitNum
 		backRightLegSwing = 28/splitNum
 		backLeftBodySwing = 40/splitNum
+		
+		print "forward condence"
 		for x in range(0, splitNum):
 			self.front_right.body.moveOffset(frontRightBodySplitDiff/splitNum)
 			self.front_right.middle.moveOffset(frontRightMiddleSplitDiff/splitNum)
@@ -201,39 +213,51 @@ class Robot():
 			#self.front_left.body.moveOffset(frontLeftBodySplitDiff/splitNum)
 			self.front_left.middle.moveOffset(frontLeftMiddleSplitDiff/splitNum)
 			self.front_left.leg.moveOffset(frontLeftLegSplitDiff/splitNum)
+			
 			self.back_right.body.moveOffset(backRightBodySwing)
 			self.back_right.middle.moveOffset(backRightMiddleSwing)
 			self.back_right.leg.moveOffset(backRightLegSwing)
 			self.back_left.body.moveOffset(backLeftBodySwing)
-		self.front_right.reset()
 		
 		time.sleep(time_delay)
 		
+		print "front right reset"
+
+		self.front_right.middle.moveOffSetInT(40,velocity)
+		self.front_right.reset()
+
+		time.sleep(4)
+		self.back_right.standardPivotStep(30,50,10, velocity,0)
+		time.sleep(4)
+		
+		'''
 		backLeftResetMoveBody = self.back_left.body.center_value - self.back_left.body.value
 		backLeftResetMoveMiddle = self.back_left.middle.value - self.back_left.middle.center_value
 		backLeftResetMoveLeg = self.back_left.leg.center_value - self.back_left.leg.value
-		self.back_left.standardPivotStepWithMidMovement(backLeftResetMoveBody, backLeftResetMoveMiddle, backLeftResetMoveLeg, velocity,time_delay)
-		time.sleep(time_delay)
 		
+		
+		
+		print "back left standard pivot step with mid movement"
+		self.back_left.standardPivotStep(backLeftResetMoveBody, backLeftResetMoveMiddle, backLeftResetMoveLeg, velocity,time_delay)
+		time.sleep(time_delay)
+
 		backRightResetMoveBody = self.back_right.body.center_value - self.back_right.body.value
 		backRightResetMoveMiddle = self.back_right.middle.center_value - self.back_right.middle.value
 		backRightResetMoveLeg = self.back_right.leg.center_value - self.back_right.leg.value
+		
+		print "back right standard pivot step with mid movement"
 		self.back_right.standardPivotStepWithMidMovement(backRightResetMoveBody, backRightResetMoveMiddle, backRightResetMoveLeg, velocity,time_delay)
 		
 		time.sleep(time_delay)
+		
 		frontLeftBodySplitDiff = self.front_left.body.center_value - self.front_left.body.value
 		frontLeftMiddleSplitDiff = self.front_left.middle.center_value  - self.front_left.middle.value 
 		frontLeftLegSplitDiff = self.front_left.leg.center_value - self.front_left.leg.value
+		
+		print "front left standard pivot step with mid movement"
 		self.front_left.standardPivotStepWithMidMovement(frontLeftBodySplitDiff, frontLeftMiddleSplitDiff, frontLeftLegSplitDiff, velocity,time_delay)
 		time.sleep(time_delay)
+		'''
 		self.reset()
 
-
-		
-		
-		
-		'''	
-		#self.reset()
-		#self.testWalk()
-		'''
 		

@@ -27,38 +27,20 @@ class Leg(object):
 		
 		middleEndVal = self.middle.value  
 		legEndVal = self.leg.value
-		
-		print "in standardPivorStep"
-		print ""
-		
-		print "moving middle"
+
 		self.middle.moveOffSetInT(middle_delta, velocity)
-		print "done moving middle"
-		print ""
 		time.sleep(time_delay)
 		
-		print "moving leg"
 		self.leg.moveOffSetInT(leg_delta,velocity)
-		print "done moving leg"
-		print ""
 		time.sleep(time_delay)
 		
-		print "moving body"
 		self.body.moveOffSetInT(body_delta,velocity)
-		print "done moving body"
-		print ""
 		time.sleep(time_delay)
 		
-		print "moving to: ",middleEndVal
 		self.middle.moveTo(middleEndVal)
-		print "done moving to",middleEndVal
-		print ""
 		time.sleep(time_delay)
 		
-		print "moving leg"
 		self.leg.moveTo(legEndVal)
-		print "done moving leg"
-		print ""
 		
 		
 	# velocity		- speed of movement (second delay between incrememnts in position)
@@ -67,25 +49,12 @@ class Leg(object):
 		middle_raise= 30
 		
 		self.middle.moveOffset(middle_raise)
-		print "in Leg Extend"
-		print ""
-		
-		print "moving leg"
 		self.leg.moveOffSetInT(leg_delta,velocity)
-		print "done moving leg"
-		print ""
 		time.sleep(time_delay)
 		
-		print "moving body"
 		self.body.moveOffSetInT(body_delta,velocity)
-		print "done moving body"
-		print ""
 		time.sleep(time_delay)
-		
-		print "moving leg"
 		self.middle.moveOffSetInT(middle_delta - middle_raise, velocity)
-		print "done moving leg"
-		print ""
 		time.sleep(time_delay)
 
 	
@@ -110,31 +79,16 @@ class Leg(object):
 		
 		middlePickUp = 40
 		
-		print "in standardPivorStep"
-		print ""
-		
-		print "moving middle"
 		self.middle.moveOffSetInT(middlePickUp, velocity)
-		print "done moving middle"
-		print ""
 		time.sleep(time_delay)
 		
-		
-		
-		print "moving body"
 		self.body.moveOffSetInT(body_delta,velocity)
-		print "done moving body"
-		print ""
 		time.sleep(time_delay)
 		
-		print "moving leg"
 		self.leg.moveOffSetInT(leg_delta,velocity)
-		print "done moving leg"
-		print ""
 		time.sleep(time_delay)
 		
 		self.middle.moveOffset(middle_delta - middlePickUp)
-		print ""
 		
 	
 
