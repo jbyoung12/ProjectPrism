@@ -4,10 +4,8 @@
 Autonomous and tele-operated quad-bot, with live streaming video and thermal imaging footage
 
 ## Hardware
-Robot made of 3d prints designed using  AutoCAD for Mac 2016 . prints hold 12 Standard Servo motors.<br>
-Power supplied externally and regulated with  DROK® LM2596 Digital Control Voltage Regulator DC Buck Converter .<br>
-Servos controlled by Adafruit's  16-Channel PWM / Servo HAT .<br>
-Software running on  Raspberry Pi 2
+The robot is made of 3d prints designed using AutoCAD for Mac 2016. The frame hold 12 Standard Servo motors which are powered through an external power supply which is regulated by the DROK® LM2596 Digital Control Voltage Regulator DC Buck Converter. The servos are driven by Adafruit's  16-Channel PWM / Servo HAT .<br>
+Software runs off a Raspberry Pi 2
 
 ## Web Interface
  Flask server  with  socket.io  python plugin provide client <-> server communication over  websocket protocol .<br>
