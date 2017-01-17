@@ -254,6 +254,7 @@ $(document).ready(function() {
 socket.on("image", function(info) {
   if (info.image) {
     //var img = new Image();
+    console.log("image recieved");
     ctx.src = 'data:image/jpeg;base64,' + info.buffer;
     //ctx.drawImage(img, 0, 0);
   }
