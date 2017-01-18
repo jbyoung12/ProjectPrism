@@ -4,12 +4,14 @@ import time,math,json
 
 class Leg(object):
 
-	def __init__(self, leg_debug, motor_debug, pwm,name, body_pin,	body_min,	body_max,	body_center, mid_horiz_value, 	middle_pin,	middle_min,	middle_max,	middle_offset_to_center, leg_horiz_value, 	leg_pin,	leg_min,	leg_max,	leg_offset_to_center):
+	def __init__(self, socketio,leg_debug, motor_debug, pwm,name, body_pin,	body_min,	body_max,	body_center, mid_horiz_value, 	middle_pin,	middle_min,	middle_max,	middle_offset_to_center, leg_horiz_value, 	leg_pin,	leg_min,	leg_max,	leg_offset_to_center):
 
 		if leg_debug:
 			print "this should print status of leg, but is not implemented yet."
 
 		self.pwm = pwm
+
+		self.socketio = socketio
 
 		self.name = name
 
@@ -17,9 +19,9 @@ class Leg(object):
 		self.middle_name = "middle"+name
 		self.leg_name = "leg"+name
 
-		self.body 	= Motor( motor_debug,	0,					body_pin,	body_min,	body_max,	body_center,				self.body_name,		pwm)
-		self.middle = Motor( motor_debug,	mid_horiz_value, 	middle_pin,	middle_min,	middle_max,	middle_offset_to_center,	self.middle_name,	pwm)
-		self.leg 	= Motor( motor_debug,	leg_horiz_value, 	leg_pin,	leg_min,	leg_max,	leg_offset_to_center,		self.leg_name,		pwm)
+		self.body 	= Motor( motor_debug,	0,					body_pin,	body_min,	body_max,	body_center,				self.body_name,		pwm,socketio)
+		self.middle = Motor( motor_debug,	mid_horiz_value, 	middle_pin,	middle_min,	middle_max,	middle_offset_to_center,	self.middle_name,	pwm,socketio)
+		self.leg 	= Motor( motor_debug,	leg_horiz_value, 	leg_pin,	leg_min,	leg_max,	leg_offset_to_center,		self.leg_name,		pwm,socketio)
 
 	# velocity		- speed of movement (second delay between incrememnts in position)
 	# Standard step in which the middle and leg lift up, the body rotates, and the middle + leg return to starting positions
@@ -29,16 +31,16 @@ class Leg(object):
 		legEndVal = self.leg.value
 
 		self.middle.moveOffSetInT(middle_delta, velocity)
-		time.sleep(time_delay)
+		self.socketio.sleep(time_delay)
 
 		self.leg.moveOffSetInT(leg_delta,velocity)
-		time.sleep(time_delay)
+		self.socketio.sleep(time_delay)
 
 		self.body.moveOffSetInT(body_delta,velocity)
-		time.sleep(time_delay)
+		self.socketio.sleep(time_delay)
 
 		self.middle.moveTo(middleEndVal)
-		time.sleep(time_delay)
+		self.socketio.sleep(time_delay)
 
 		self.leg.moveTo(legEndVal)
 
@@ -50,12 +52,12 @@ class Leg(object):
 
 		self.middle.moveOffset(middle_raise)
 		self.leg.moveOffSetInT(leg_delta,velocity)
-		time.sleep(time_delay)
+		self.socketio.sleep(time_delay)
 
 		self.body.moveOffSetInT(body_delta,velocity)
-		time.sleep(time_delay)
+		self.socketio.sleep(time_delay)
 		self.middle.moveOffSetInT(middle_delta - middle_raise, velocity)
-		time.sleep(time_delay)
+		self.socketio.sleep(time_delay)
 
 
 	def setMidAndLegHoriz(self):
@@ -80,13 +82,13 @@ class Leg(object):
 		middlePickUp = 40
 
 		self.middle.moveOffSetInT(middlePickUp, velocity)
-		time.sleep(time_delay)
+		self.socketio.sleep(time_delay)
 
 		self.body.moveOffSetInT(body_delta,velocity)
-		time.sleep(time_delay)
+		self.socketio.sleep(time_delay)
 
 		self.leg.moveOffSetInT(leg_delta,velocity)
-		time.sleep(time_delay)
+		self.socketio.sleep(time_delay)
 
 		self.middle.moveOffset(middle_delta - middlePickUp)
 		

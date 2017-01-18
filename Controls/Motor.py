@@ -5,7 +5,7 @@ class Motor(object):
 
 	'''* servoMin == 125, servoMax == 525ms *'''
 	'''* minVal>=0, maxVal<=100 *'''
-	def __init__(self, debug, horiz_value, pinNumber, minVal, maxVal, offset_to_center,name, pwm):
+	def __init__(self, debug, horiz_value, pinNumber, minVal, maxVal, offset_to_center,name, pwm,socketio):
 		
 		if debug:
 			print "Motor Init. name: ",name,"	| minValue: ",minVal,"	| maxValue: ",maxVal,"	| centerVal: ",centerVal
@@ -25,6 +25,8 @@ class Motor(object):
 		self.name = name
 		
 		self.pwm = pwm
+		
+		self.socketio = socketio
 		
 		self.moveTo(self.center_value)
 
@@ -76,7 +78,7 @@ class Motor(object):
 	def moveOffSetInT(self,deltaVal,t):
 		for i in range(int(math.fabs(deltaVal))):
 			self.moveOffset( RobotUtils.PositiveOrNegative(deltaVal) ) 
-			time.sleep(t)
+			self.socketio.sleep(t)
 	
 	
 	def moveOffset(self,deltaVal):

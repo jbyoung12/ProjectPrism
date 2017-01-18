@@ -130,23 +130,11 @@ function gamepadLoop() {
 
       newValue = map_range(gamepad.axes[currentAxisNum], -1, 1, 0, 100);
 
-      // if value is greater than threshold we change the bars
-      if (Math.abs(newValue - 50) > leastSignificantValidChange) {
-        document.getElementById(data.controls.gamepad.inputs[i].elementId).setAttribute("style", "width:" + newValue + "%");
-      } else {
-        document.getElementById(data.controls.gamepad.inputs[i].elementId).setAttribute("style", "width:50%");
-      }
-
-      // we sent the value of the data regardless of whether its significant to let the robot interpret
-      data.controls.gamepad.inputs[i].value = newValue;
-      send_data();
-      //}
-      /*
       if (valuesChanged(oldValue, newValue, leastSignificantValidChange)) {
         document.getElementById(data.controls.gamepad.inputs[i].elementId).setAttribute("style", "width:" + newValue + "%");
         data.controls.gamepad.inputs[i].value = newValue;
         send_data();
-      }*/
+      }
     }
 
   } else {
@@ -228,11 +216,9 @@ function initializeSliders() {
       }
     });
 
-    window.setInterval(function() {
-      if (!data.controls.gamepad.gamepadConnected) {
-        send_data();
-      }
-    }, data.controls.gamepad.poll_time);
+    slider.noUiSlider.on('change',function(){
+			send_data();
+	})
 
   }
 
@@ -241,6 +227,7 @@ function initializeSliders() {
 
 function send_data() {
 
+	console.log("in send_data()")
   sendData = {};
 
   if (data.controls.gamepad.gamepadConnected) {
@@ -259,7 +246,7 @@ function send_data() {
   socket.emit('valueUpdate', {
     data: sendData
   }, function(callbackData) {
-    //console.log("Server Response | callbackData:" + callbackData);
+    console.log("Server Response | callbackData:" + callbackData);
   });
   return false;
 }
