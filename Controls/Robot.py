@@ -106,15 +106,27 @@ class Robot():
 			print "ERROR: LEG CANNOT BE IDENTIFIED"
 
 	# {u'data': {u'xMovement': u'50.00', u'stop': False, u'horizontalVideo': u'24.02', u'yMovement': u'50.00', u'verticalVideo': u'50.00', u'autonomous': False}}
+	# Called by server when a change in user data is detected
 	def inputData(self,data):
 		json_data 	= json.load(data)
-		self.xMovement 	= json_data["data"]["xMovement"]
-		self.yMovement 	= json_data["data"]["yMovement"]
+
+		print "data recieved"
+		self.xMovement 		= json_data["data"]["xMovement"]
+		self.yMovement	 	= json_data["data"]["yMovement"]
 		self.horizVidValue 	= json_data["data"]["horizontalVideo"]
 		self.vertVidValue 	= json_data["data"]["verticalVideo"]
-		self.stop 	  	= json_data["data"]["stop"]
+		self.stop 	  		= json_data["data"]["stop"]
 		self.autonomous 	= json_data["data"]["autonomous"]
+
 		self.updateAgenda()
+
+
+
+
+
+
+
+
 
 	# acts as central coordinator for the robot - raeads incoming data + state of the bot and calls methods accordingly
 	def updateAgenda(self):
@@ -161,7 +173,7 @@ class Robot():
 						if self.yMovement > 50:
 
 							# perform next segment of forward walk
-							self.forward(self.forwardInc)
+							self.walkInit()
 
 							# increment forward walk increment variable
 							self.forwardInc += 1
@@ -275,10 +287,10 @@ class Robot():
 	# method to develop walking motion
 	# method to develop walking motion
 	def walkInit(self):
-		
+
 		velocity = .01
 		time_delay = .025
-		
+
 		if self.forwardInc < 8:
 
 			std_piv_step_body_delta = -20
@@ -286,26 +298,26 @@ class Robot():
 			std_piv_step_leg_delta = 5
 
 			if self.forwardInc == 1:
-				self.forwardInc +=1
 				print "front left pivot step"
 				self.front_left.standardPivotStep(std_piv_step_body_delta, std_piv_step_middle_delta, std_piv_step_leg_delta,velocity,time_delay*.01)
 				time.sleep(time_delay)
+				self.updateAgenda()
 
 			elif self.forwardInc == 2:
-				self.forwardInc +=1
 				print "back right pivot step"
 				self.back_right.standardPivotStep(-std_piv_step_body_delta, std_piv_step_middle_delta, std_piv_step_leg_delta,velocity,time_delay)
 				time.sleep(time_delay)
+				self.updateAgenda()
 
 			leg_extend_body_delta = 35
 			leg_extend_middle_delta =-5
 			leg_extend_leg_delta = 28
 
 			elif self.forwardInc == 3:
-				self.forwardInc +=1
 				print "front right leg extend"
 				self.front_right.legExtend( leg_extend_body_delta, leg_extend_middle_delta, leg_extend_leg_delta, velocity, time_delay)
 				time.sleep(time_delay)
+				self.updateAgenda()
 
 			splitNum = 10
 			leg_condense_FLbody_delta = 40/splitNum
@@ -317,7 +329,6 @@ class Robot():
 			leg_condense_BLleg_delta = 28/splitNum
 
 			elif self.forwardInc == 4:
-				self.forwardInc +=1
 				print "condense forward right"
 				for x in range(0, splitNum):
 					self.front_left.body.moveOffset(leg_condense_FLbody_delta)
@@ -327,6 +338,7 @@ class Robot():
 					self.back_left.body.moveOffset(leg_condense_BLbody_delta)
 					self.back_left.middle.moveOffset(leg_condense_BLmiddle_delta)
 					self.back_left.leg.moveOffset(leg_condense_BLleg_delta)
+				self.updateAgenda()
 
 			leg_step_BLbody_delta = -30
 			leg_step_BLmiddle_delta = 30
@@ -334,19 +346,19 @@ class Robot():
 			time.sleep(time_delay)
 
 			elif self.forwardInc == 5:
-				self.forwardInc +=1
 				print "back left standard pivot step with mid offset"
 				self.back_left.standardPivotStepWithMidMovement(leg_step_BLbody_delta, leg_step_BLmiddle_delta, leg_step_BLleg_delta,velocity,time_delay)
+				self.updateAgenda()
 
 			leg_step_FRbody_delta = -40
 			leg_step_FRmiddle_delta = 5
 			leg_step_FRleg_delta = 28
 
 			elif self.forwardInc == 6:
-				self.forwardInc +=1
 				print "front left standard pivot step with mid movement"
 				self.front_left.standardPivotStepWithMidMovement(leg_step_FRbody_delta, leg_step_FRmiddle_delta, leg_step_FRleg_delta, velocity,time_delay)
 				time.sleep(time_delay)
+				self.updateAgenda()
 
 			frontRightBodySplitDiff = self.front_right.body.center_value - self.front_right.body.value
 			frontRightMiddleSplitDiff =self.front_right.middle.value - self.front_right.middle.center_value
@@ -362,7 +374,6 @@ class Robot():
 			backLeftBodySwing = 40/splitNum
 
 			elif self.forwardInc == 7:
-				self.forwardInc +=1
 				print "forward condence"
 				for x in range(0, splitNum):
 					self.front_right.body.moveOffset(frontRightBodySplitDiff/splitNum)
@@ -379,6 +390,7 @@ class Robot():
 					self.back_left.body.moveOffset(backLeftBodySwing)
 
 				time.sleep(time_delay)
+				self.updateAgenda()
 
 			else:
 				print "This message should not appear"
@@ -389,22 +401,33 @@ class Robot():
 
 	def walkCont(self,time_delay,velocity,timesThrough):
 
+		# THIS WILL NOT WORK. KNOWN BUG
+		if(timesThrough ==2):
+			print "times through == 2, reseting to avoid offset buildup"
+			self.reset()
+			self.forwardInc == self.forwardIncMin
+			self.walkInit()
+
 		leg_step_BRbody_delta = 30
 		leg_step_BRmiddle_delta = 30
 		leg_step_BRleg_delta = -28
 		time.sleep(time_delay)
 
-		print "back right standard pivot step with mid offset"
-		self.back_right.standardPivotStepWithMidMovement(leg_step_BRbody_delta, leg_step_BRmiddle_delta, leg_step_BRleg_delta,velocity,time_delay)
+		if self.forwardInc  == 8:
+			print "back right standard pivot step with mid offset"
+			self.back_right.standardPivotStepWithMidMovement(leg_step_BRbody_delta, leg_step_BRmiddle_delta, leg_step_BRleg_delta,velocity,time_delay)
+			self.updateAgenda()
 
-		leg_extend_body_delta = 35
-		leg_extend_middle_delta =-5
-		leg_extend_leg_delta = 28
+		elif self.forwardInc == 9:
 
-		print "front right leg extend"
-		self.front_right.legExtend( leg_extend_body_delta, leg_extend_middle_delta, leg_extend_leg_delta, velocity, time_delay)
-		time.sleep(time_delay)
+			leg_extend_body_delta = 35
+			leg_extend_middle_delta =-5
+			leg_extend_leg_delta = 28
 
+			print "front right leg extend"
+			self.front_right.legExtend( leg_extend_body_delta, leg_extend_middle_delta, leg_extend_leg_delta, velocity, time_delay)
+			time.sleep(time_delay)
+			self.updateAgenda()
 
 		RlungeFLbody= 40
 		RlungeBRbody= -20
@@ -412,20 +435,26 @@ class Robot():
 		RlungeFRleg = -28
 		RlungeBLmiddle = -10
 		RlungeBLleg = 28
-		self.lunge(0,RlungeFRmiddle,RlungeFRleg,RlungeFLbody,0,0, 0,RlungeBLmiddle,RlungeBLleg,RlungeBRbody,0,0)
 
+		elif self.forwardInc == 10:
+			self.lunge(0,RlungeFRmiddle,RlungeFRleg,RlungeFLbody,0,0, 0,RlungeBLmiddle,RlungeBLleg,RlungeBRbody,0,0)
+			self.updateAgenda()
 
 		leg_step_BLbody_delta = -30
 		leg_step_BLmiddle_delta = 30
 		leg_step_BLleg_delta = -28
 		time.sleep(time_delay)
 
-		print "back left standard pivot step with mid offset"
-		self.back_left.standardPivotStepWithMidMovement(leg_step_BLbody_delta, leg_step_BLmiddle_delta, leg_step_BLleg_delta,velocity,time_delay)
+		elif self.forwardInc == 11:
+			print "back left standard pivot step with mid offset"
+			self.back_left.standardPivotStepWithMidMovement(leg_step_BLbody_delta, leg_step_BLmiddle_delta, leg_step_BLleg_delta,velocity,time_delay)
+			self.updateAgenda()
 
-		print "front left leg extend"
-		self.front_left.legExtend( -leg_extend_body_delta, leg_extend_middle_delta, leg_extend_leg_delta, velocity, time_delay)
-		time.sleep(time_delay)
+		elif self.forwardInc == 12:
+			print "front left leg extend"
+			self.front_left.legExtend( -leg_extend_body_delta, leg_extend_middle_delta, leg_extend_leg_delta, velocity, time_delay)
+			time.sleep(time_delay)
+			self.updateAgenda()
 
 		LlungeFRbody= -40
 		LlungeBLbody= 20
@@ -433,12 +462,15 @@ class Robot():
 		LlungeFLleg = -28
 		LlungeBRmiddle = -10
 		LlungeBRleg = 28
-		self.lunge(LlungeFRbody, 0,0,0,LlungeFLmiddle,LlungeFLleg, LlungeBLbody,0,0 ,0,LlungeBRmiddle, LlungeBRleg)
-		if(timesThrough ==2):
-			self.reset()
-			self.testWalk()
+
+		elif self.forwardInc == 13:
+			self.lunge(LlungeFRbody, 0,0,0,LlungeFLmiddle,LlungeFLleg, LlungeBLbody,0,0 ,0,LlungeBRmiddle, LlungeBRleg)
+			self.forwardInc == 7
+			self.updateAgenda()
+
 		else:
-			self.walkCont(time_delay,velocity,timesThrough+1)
+			print "this print statement should never be visible. error."
+
 
 	def lunge(self, FRB, FRM, FRL, FLB, FLM, FLL, BLB, BLM, BLL, BRB, BRM, BRL):
 		splitNum = 10
