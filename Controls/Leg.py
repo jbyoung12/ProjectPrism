@@ -4,9 +4,12 @@ import time,math,json
 
 class Leg(object):
 
-	def __init__(self, socketio,leg_debug, motor_debug, pwm,name, body_pin,	body_min,	body_max,	body_center, mid_horiz_value, 	middle_pin,	middle_min,	middle_max,	middle_offset_to_center, leg_horiz_value, 	leg_pin,	leg_min,	leg_max,	leg_offset_to_center):
+	def __init__(self, socketio, pwm,name, body_pin,	body_min,	body_max,	body_center, mid_horiz_value, 	middle_pin,	middle_min,	middle_max,	middle_offset_to_center, leg_horiz_value, 	leg_pin,	leg_min,	leg_max,	leg_offset_to_center):
 
-		if leg_debug:
+
+		self.leg_debug = RobotUtils.LEG_DEBUG
+
+		if self.leg_debug:
 			print "this should print status of leg, but is not implemented yet."
 
 		self.pwm = pwm
@@ -19,9 +22,9 @@ class Leg(object):
 		self.middle_name = "middle"+name
 		self.leg_name = "leg"+name
 
-		self.body 	= Motor( motor_debug,	0,					body_pin,	body_min,	body_max,	body_center,				self.body_name,		pwm,socketio)
-		self.middle = Motor( motor_debug,	mid_horiz_value, 	middle_pin,	middle_min,	middle_max,	middle_offset_to_center,	self.middle_name,	pwm,socketio)
-		self.leg 	= Motor( motor_debug,	leg_horiz_value, 	leg_pin,	leg_min,	leg_max,	leg_offset_to_center,		self.leg_name,		pwm,socketio)
+		self.body 	= Motor( 0,					body_pin,	body_min,	body_max,	body_center,				self.body_name,		pwm,socketio)
+		self.middle = Motor( mid_horiz_value, 	middle_pin,	middle_min,	middle_max,	middle_offset_to_center,	self.middle_name,	pwm,socketio)
+		self.leg 	= Motor( leg_horiz_value, 	leg_pin,	leg_min,	leg_max,	leg_offset_to_center,		self.leg_name,		pwm,socketio)
 
 	# velocity		- speed of movement (second delay between incrememnts in position)
 	# Standard step in which the middle and leg lift up, the body rotates, and the middle + leg return to starting positions
@@ -91,4 +94,3 @@ class Leg(object):
 		self.socketio.sleep(time_delay)
 
 		self.middle.moveOffset(middle_delta - middlePickUp)
-		

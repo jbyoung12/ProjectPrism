@@ -20,16 +20,30 @@ var data = {
     "name": "battery",
     "labelSize": 5,
     "displayType": "progress_bar",
-    "class": "progress-bar progress-bar-success",
+    "class": "progress-bar",
     "id": "batteryValue",
     "data": {
       "current": 90,
       "min": 0,
       "max": 180
     }
+  }, {
+    "name": "temperature",
+    "labelSize": 5,
+    "displayType": "progress_bar",
+    "class": "progress-bar",
+    "id": "temp",
+    "data": {
+      "current": 30,
+      "min": 0,
+      "max": 180
+    }
   }],
 
   "controls": {
+    "keyboard": {
+
+    },
     "sliders": [
       xMovementSlider = {
         "id": "xMovement",
@@ -67,9 +81,9 @@ var data = {
     ],
     "gamepad": {
       "gamepadConnected": false,
-      "poll_time": 100,
+      "poll_time": 35,
       "gamepadVisible": false,
-      "leastSignificantValidChange": 5,
+      "leastSignificantValidChange": 10,
       "inputs": [{
         "name": "xMovement",
         "elementId": "gamepad_x_movement",
@@ -93,7 +107,6 @@ var data = {
       }]
     }
   }
-
 }
 
 function initializeGamepad() {
@@ -177,7 +190,6 @@ socket.on('failure', function(msg) {
   alert(msg);
 });
 
-
 $(document).ready(function() {
   hideElement("gamepadControls");
   initializeButtons();
@@ -216,9 +228,9 @@ function initializeSliders() {
       }
     });
 
-    slider.noUiSlider.on('change',function(){
-			send_data();
-	})
+    slider.noUiSlider.on('change', function() {
+      send_data();
+    })
 
   }
 
@@ -227,7 +239,7 @@ function initializeSliders() {
 
 function send_data() {
 
-	console.log("in send_data()")
+  console.log("in send_data()")
   sendData = {};
 
   if (data.controls.gamepad.gamepadConnected) {
