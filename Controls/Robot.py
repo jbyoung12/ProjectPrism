@@ -1,24 +1,26 @@
 #!/usr/bin/python
-
 from RobotUtil import RobotUtils
 if RobotUtils.LIVE_TESTING:
 	from pwm import PWM
 	from I2C import Adafruit_I2C
 from Leg import Leg
 from Motor import Motor
-import time,math,json,sys,socketio
+import time,math,json,sys,threading
+from Queue import Queue,Empty
 
 class Robot():
 
-	def __init__(self,socketio):
-
-		self.socketio = socketio
+	def __init__(self):
 
 		if RobotUtils.LIVE_TESTING:
 			self.pwm = PWM()
 			self.pwm.setPWMFreq(RobotUtils.FREQUENCY)
 		else:
 			self.pwm = None
+
+		self.inputQueue = Queue()
+		self.agendaThread = threading.Thread(group=None,target=self.updateAgendaLoop,name="agendaThread")
+		self.agendaThread.start()
 
 		self.data_file_name = RobotUtils.DATA_FILE
 
@@ -56,8 +58,8 @@ class Robot():
 		self.vertVidMinVal = 0
 		self.vertVidMaxVal = 100
 
-		self.horizVidMotor = Motor(self.horizVidValue, self.horizVidPin, self.horizVidMinVal, self.horizVidMaxVal, 0,"horizantal video motor", self.pwm,socketio)
-		self.vertVidMotor = Motor( self.vertVidValue, self.vertVidPin, self.vertVidMinVal, self.vertVidMaxVal, 0,"vertical video motor", self.pwm,socketio)
+		self.horizVidMotor = Motor(self.horizVidValue, self.horizVidPin, self.horizVidMinVal, self.horizVidMaxVal, 0,"horizantal video motor", self.pwm)
+		self.vertVidMotor = Motor( self.vertVidValue, self.vertVidPin, self.vertVidMinVal, self.vertVidMaxVal, 0,"vertical video motor", self.pwm)
 
 		self.setup()
 		self.stand()
@@ -72,9 +74,6 @@ class Robot():
 			constants = data["constants"]
 			for i in range(len(data["legs"])):
 				self.add_leg(data["legs"][i],constants)
-
-
-
 
 	# reads dictuanary values from input, creates a Leg object, and adds it to leg variables
 	def add_leg(self,legData,constants):
@@ -99,7 +98,7 @@ class Robot():
 		leg_max 				= constants["legRange"]["max"]
 		leg_offset_to_center 	= constants["legOffsetFromHoriz"]
 
-		leg = Leg(	self.socketio,self.pwm, leg_name, body_pin,	body_min,	body_max,	body_center, mid_horiz_value, 	middle_pin,	middle_min,	middle_max,	middle_offset_to_center, leg_horiz_value, 	leg_pin,	leg_min,	leg_max,	leg_offset_to_center)
+		leg = Leg( self.pwm, leg_name, body_pin,	body_min,	body_max,	body_center, mid_horiz_value, 	middle_pin,	middle_min,	middle_max,	middle_offset_to_center, leg_horiz_value, 	leg_pin,	leg_min,	leg_max,	leg_offset_to_center)
 
 		if leg_name == "FR":
 			self.front_right = leg
@@ -116,27 +115,38 @@ class Robot():
 		else:
 			print "ERROR: LEG CANNOT BE IDENTIFIED"
 
-	# {u'data': {u'xMovement': u'50.00', u'stop': False, u'horizontalVideo': u'24.02', u'yMovement': u'50.00', u'verticalVideo': u'50.00', u'autonomous': False}}
 	# Called by server when a change in user data is detected
 	def inputData(self,data):
+		self.inputQueue.put(data)
 
-
-		sys.stdout.write('\033[94m' + "\n Robot: Data Recieved" + '\033[0m \n')
-
-		self.xMovement 		= int(data["data"]["xMovement"])
-		self.yMovement	 	= int(data["data"]["yMovement"])
-
-		self.horizVidValue 	= int(data["data"]["horizontalVideo"])
-		self.vertVidValue 	= int(data["data"]["verticalVideo"])
+	def processData(self,data):
+		self.xMovement 		= float(data["data"]["xMovement"])
+		self.yMovement	 	= float(data["data"]["yMovement"])
+		self.horizVidValue 	= float(data["data"]["horizontalVideo"])
+		self.vertVidValue 	= float(data["data"]["verticalVideo"])
 		self.stop 	  		= data["data"]["stop"]
 		self.autonomous 	= data["data"]["autonomous"]
 
-		self.updateAgenda()
+	def updateAgendaLoop(self):
+		n = 100
+		while n>0:
+			try:
+				data = self.inputQueue.get_nowait()
+				self.processData(data)
+				self.updateAgenda()
+			except Empty:
+				print "pass"
+				pass
 
+			time.sleep(RobotUtils.AGENDA_UPDATE_SPEED)
+			n -= 1
+		print '\033[94m' + "Robot: QUEUE READING FINISHED" + '\033[0m'
+		sys.exit()
 
 	# acts as central coordinator for the robot - raeads incoming data + state of the bot and calls methods accordingly
 	def updateAgenda(self):
 
+		print "in updateAgeda()"
 		# if stop is called, the bot freezes in standing pose
 		if not self.stop:
 
@@ -162,14 +172,14 @@ class Robot():
 
 						# if xMovement is greater than 50 than we move left
 						if self.xMovement < 50:
-							print '\033[94m' + "Robot: LEFT" + '\033[0m'
+							print '\033[95m' + "Robot: LEFT" + '\033[0m \n'
 							self.turn(1)
 							self.forwardInc = self.forwardIncMin
 
 						# turn left
 						elif self.xMovement >= 50:
 							self.turn(-1)
-							print '\033[94m' + "Robot: RIGHT" + '\033[0m'
+							print '\033[95m' + "Robot: RIGHT" + '\033[0m \n'
 							self.forwardInc = self.forwardIncMin
 
 						else:
@@ -179,11 +189,12 @@ class Robot():
 					elif yMagnitude > xMagnitude:
 
 						# move forward
-						if self.yMovement < 50:
+						if self.yMovement > 50:
 
-							print '\033[94m' + "Robot: FORWARD" + '\033[0m'
+							print '\033[95m' + "Robot: FORWARD" + '\033[0m \n'
 							# perform next segment of forward walk
 							self.walkInit()
+
 
 							# increment forward walk increment variable
 							self.forwardInc += 1
@@ -196,28 +207,15 @@ class Robot():
 							self.backwardInc = self.backwardIncMin
 
 						# move backward
-					elif self.yMovement >= 50:
-							print '\033[94m' + "Robot: BACKWARD" + '\033[0m'
+						elif self.yMovement <= 50:
+							print '\033[95m' + "Robot: BACKWARD" + '\033[0m \n'
 
-							'''
-							# perform next segment of backward walk
-							self.backward(self.backwardInc)
-
-							# increment backward walk increment variable
-							self.backwardInc += 1
-
-							# test to see if backward walk incrment variable has reached maximum value and reset it to min value if it has
-							if self.backwardInc == self.backwardIncMax:
-								self.backwardInc = self.backwardIncMin
-
-							# reset the forward incrementer, because the forward motion has been stopped, and needs to reset
-							self.forwardInc = self.backwardIncMin
-							'''
+						else:
+							print "logic error. this should not be printed"
 
 				else:
 					print "\033[94m","Robot: STAND","\033[0m"
 					self.stand()
-
 
 		else:
 			print "\033[94m","Robot: STOP \033[0m"
@@ -252,21 +250,21 @@ class Robot():
 			x = i + mid.min
 			mid.moveTo(x)
 			print "setting :",mid.name," to : ",x
-			self.socketio.sleep(.1)
+			self.time.sleep(.1)
 
 	def setAllHoriz(self):
 		self.front_right.setMidAndLegHoriz()
 		self.front_left.setMidAndLegHoriz()
 		self.back_right.setMidAndLegHoriz()
 		self.back_left.setMidAndLegHoriz()
-		self.socketio.sleep(5)
+		time.sleep(5)
 
 	def setMidsToMin(self):
 		self.front_right.middle.moveTo(self.front_right.middle.min)
 		self.front_left.middle.moveTo(self.front_left.middle.min)
 		self.back_left.middle.moveTo(self.back_left.middle.min)
 		self.back_right.middle.moveTo(self.back_right.middle.min)
-		self.socketio.sleep(10)
+		time.sleep(10)
 
 	def setMidsToMax(self):
 		self.front_right.middle.moveTo(self.front_right.middle.max)
@@ -286,16 +284,16 @@ class Robot():
 		velocity = 0.002
 		time_delay = 0
 		self.front_right.standardPivotStep(turnDegree, stepHeightMid, stepHeightLeg, velocity, time_delay)
-		self.socketio.sleep(time_delay)
+		time.sleep(time_delay)
 
 		self.back_left.standardPivotStep(turnDegree, stepHeightMid, stepHeightLeg, velocity, time_delay)
-		self.socketio.sleep(time_delay)
+		time.sleep(time_delay)
 
 		self.front_left.standardPivotStep(turnDegree, stepHeightMid, stepHeightLeg,velocity,time_delay)
-		self.socketio.sleep(time_delay)
+		time.sleep(time_delay)
 
 		self.back_right.standardPivotStep(turnDegree, stepHeightMid, stepHeightLeg, velocity, time_delay)
-		self.socketio.sleep(time_delay)
+		time.sleep(time_delay)
 		self.reset()
 
 
@@ -322,12 +320,12 @@ class Robot():
 
 			if self.forwardInc == 1:
 				self.front_left.standardPivotStep(std_piv_step_body_delta, std_piv_step_middle_delta, std_piv_step_leg_delta,velocity,time_delay*.01)
-				self.socketio.sleep(time_delay)
+				time.sleep(time_delay)
 				#self.updateAgenda()
 
 			elif self.forwardInc == 2:
 				self.back_right.standardPivotStep(-std_piv_step_body_delta, std_piv_step_middle_delta, std_piv_step_leg_delta,velocity,time_delay)
-				self.socketio.sleep(time_delay)
+				time.sleep(time_delay)
 				#self.updateAgenda()
 
 			else:
@@ -344,7 +342,7 @@ class Robot():
 				print " walkInit with self.forwardInc:	",self.forwardInc
 				#print "back right pivot step"
 				self.back_right.standardPivotStep(-std_piv_step_body_delta, std_piv_step_middle_delta, std_piv_step_leg_delta,velocity,time_delay)
-				self.socketio.sleep(time_delay)
+				time.sleep(time_delay)
 				self.updateAgenda()
 
 			leg_extend_body_delta 	= 35
@@ -356,7 +354,7 @@ class Robot():
 				print " walkInit with self.forwardInc:	",self.forwardInc
 				print "front right leg extend"
 				#self.front_right.legExtend( leg_extend_body_delta, leg_extend_middle_delta, leg_extend_leg_delta, velocity, time_delay)
-				self.socketio.sleep(time_delay)
+				time.sleep(time_delay)
 				self.updateAgenda()
 
 
@@ -387,7 +385,7 @@ class Robot():
 			leg_step_BLbody_delta = -30
 			leg_step_BLmiddle_delta = 30
 			leg_step_BLleg_delta = -28
-			self.socketio.sleep(time_delay)
+			time.sleep(time_delay)
 
 
 			elif self.forwardInc == 5:
@@ -404,7 +402,7 @@ class Robot():
 				print " walkInit with self.forwardInc:	",self.forwardInc
 				#print "front left standard pivot step with mid movement"
 				self.front_left.standardPivotStepWithMidMovement(leg_step_FRbody_delta, leg_step_FRmiddle_delta, leg_step_FRleg_delta, velocity,time_delay)
-				self.socketio.sleep(time_delay)
+				time.sleep(time_delay)
 				self.updateAgenda()
 
 			frontRightBodySplitDiff = self.front_right.body.center_value - self.front_right.body.value
@@ -438,7 +436,7 @@ class Robot():
 					self.back_right.leg.moveOffset(backRightLegSwing)
 					self.back_left.body.moveOffset(backLeftBodySwing)
 
-				self.socketio.sleep(time_delay)
+				time.sleep(time_delay)
 				self.updateAgenda()
 
 			else:
@@ -462,7 +460,7 @@ class Robot():
 		leg_step_BRbody_delta = 30
 		leg_step_BRmiddle_delta = 30
 		leg_step_BRleg_delta = -28
-		self.socketio.sleep(time_delay)
+		time.sleep(time_delay)
 		'''
 		if self.forwardInc  == 8:
 			print " walkCont with self.forwardInc:	",self.forwardInc
@@ -479,7 +477,7 @@ class Robot():
 			print " walkCont with self.forwardInc:	",self.forwardInc
 			#print "front right leg extend"
 			self.front_right.legExtend( leg_extend_body_delta, leg_extend_middle_delta, leg_extend_leg_delta, velocity, time_delay)
-			self.socketio.sleep(time_delay)
+			time.sleep(time_delay)
 			self.updateAgenda()
 
 		RlungeFLbody= 40
@@ -496,7 +494,7 @@ class Robot():
 		leg_step_BLbody_delta = -30
 		leg_step_BLmiddle_delta = 30
 		leg_step_BLleg_delta = -28
-		self.socketio.sleep(time_delay)
+		time.sleep(time_delay)
 
 		elif self.forwardInc == 11:
 			print " walkCont with self.forwardInc:	",self.forwardInc
@@ -508,7 +506,7 @@ class Robot():
 			print " walkCont with self.forwardInc:	",self.forwardInc
 			#print "front left leg extend"
 			self.front_left.legExtend( -leg_extend_body_delta, leg_extend_middle_delta, leg_extend_leg_delta, velocity, time_delay)
-			self.socketio.sleep(time_delay)
+			time.sleep(time_delay)
 			self.updateAgenda()
 
 		LlungeFRbody= -40
@@ -560,7 +558,7 @@ class Robot():
 		leg_step_BRbody_delta = 30
 		leg_step_BRmiddle_delta = 30
 		leg_step_BRleg_delta = -28
-		self.socketio.sleep(time_delay)
+		time.sleep(time_delay)
 
 		self.back_right.standardPivotStepWithMidMovement(leg_step_BRbody_delta, leg_step_BRmiddle_delta, leg_step_BRleg_delta,velocity,time_delay)
 
@@ -569,7 +567,7 @@ class Robot():
 		leg_extend_leg_delta = 28
 
 		self.front_right.legExtend( leg_extend_body_delta, leg_extend_middle_delta, leg_extend_leg_delta, velocity, time_delay)
-		self.socketio.sleep(time_delay)
+		time.sleep(time_delay)
 
 		RlungeFLbody= 40
 		RlungeBRbody= -20
@@ -583,12 +581,12 @@ class Robot():
 		leg_step_BLbody_delta = -30
 		leg_step_BLmiddle_delta = 30
 		leg_step_BLleg_delta = -28
-		self.socketio.sleep(time_delay)
+		time.sleep(time_delay)
 
 		self.back_left.standardPivotStepWithMidMovement(leg_step_BLbody_delta, leg_step_BLmiddle_delta, leg_step_BLleg_delta,velocity,time_delay)
 
 		self.front_left.legExtend( -leg_extend_body_delta, leg_extend_middle_delta, leg_extend_leg_delta, velocity, time_delay)
-		self.socketio.sleep(time_delay)
+		time.sleep(time_delay)
 
 		LlungeFRbody= -40
 		LlungeBLbody= 20
@@ -614,10 +612,10 @@ class Robot():
 
 
 		self.front_left.standardPivotStep(std_piv_step_body_delta, std_piv_step_middle_delta, std_piv_step_leg_delta,velocity,time_delay*.01)
-		self.socketio.sleep(time_delay)
+		time.sleep(time_delay)
 
 		self.back_right.standardPivotStep(-std_piv_step_body_delta, std_piv_step_middle_delta, std_piv_step_leg_delta,velocity,time_delay)
-		self.socketio.sleep(time_delay)
+		time.sleep(time_delay)
 
 		leg_extend_body_delta 	= 35
 		leg_extend_middle_delta = -5
@@ -625,7 +623,7 @@ class Robot():
 
 
 		self.front_right.legExtend( leg_extend_body_delta, leg_extend_middle_delta, leg_extend_leg_delta, velocity, time_delay)
-		self.socketio.sleep(time_delay)
+		time.sleep(time_delay)
 
 		splitNum = 10
 		leg_condense_FLbody_delta = 40/splitNum
@@ -650,7 +648,7 @@ class Robot():
 		leg_step_BLbody_delta = -30
 		leg_step_BLmiddle_delta = 30
 		leg_step_BLleg_delta = -28
-		self.socketio.sleep(time_delay)
+		time.sleep(time_delay)
 
 
 		self.back_left.standardPivotStepWithMidMovement(leg_step_BLbody_delta, leg_step_BLmiddle_delta, leg_step_BLleg_delta,velocity,time_delay)
@@ -660,7 +658,7 @@ class Robot():
 		leg_step_FRleg_delta = 28
 
 		self.front_left.standardPivotStepWithMidMovement(leg_step_FRbody_delta, leg_step_FRmiddle_delta, leg_step_FRleg_delta, velocity,time_delay)
-		self.socketio.sleep(time_delay)
+		time.sleep(time_delay)
 
 		frontRightBodySplitDiff = self.front_right.body.center_value - self.front_right.body.value
 		frontRightMiddleSplitDiff =self.front_right.middle.value - self.front_right.middle.center_value
@@ -689,6 +687,6 @@ class Robot():
 		self.back_right.leg.moveOffset(backRightLegSwing)
 		self.back_left.body.moveOffset(backLeftBodySwing)
 
-		self.socketio.sleep(time_delay)
+		time.sleep(time_delay)
 
 		#self.displayWalkCont(time_delay,velocity,1)

@@ -81,7 +81,7 @@ var data = {
     ],
     "gamepad": {
       "gamepadConnected": false,
-      "poll_time": 35,
+      "poll_time": 10,
       "gamepadVisible": false,
       "leastSignificantValidChange": 10,
       "inputs": [{
