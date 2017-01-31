@@ -41,6 +41,7 @@ var data = {
   }],
 
   "controls": {
+    "poll_time": 500,
     "keyboard": {
 
     },
@@ -81,9 +82,8 @@ var data = {
     ],
     "gamepad": {
       "gamepadConnected": false,
-      "poll_time": 10,
       "gamepadVisible": false,
-      "leastSignificantValidChange": 10,
+      "leastSignificantValidChange": 0,
       "inputs": [{
         "name": "xMovement",
         "elementId": "gamepad_x_movement",
@@ -111,7 +111,7 @@ var data = {
 
 function initializeGamepad() {
   if ("getGamepads" in navigator) {
-    var gamepadInterval = setInterval(gamepadLoop, data.controls.gamepad.poll_time);
+    var gamepadInterval = setInterval(gamepadLoop, data.controls.poll_time);
   } else {
     gamepadControls.innerHTML = "<h3>gamepad not available on your browser. Please switch to chrome </h3>";
     alert("Error! cannot gamepad");
@@ -143,11 +143,15 @@ function gamepadLoop() {
 
       newValue = map_range(gamepad.axes[currentAxisNum], -1, 1, 0, 100);
 
+      /*
       if (valuesChanged(oldValue, newValue, leastSignificantValidChange)) {
         document.getElementById(data.controls.gamepad.inputs[i].elementId).setAttribute("style", "width:" + newValue + "%");
         data.controls.gamepad.inputs[i].value = newValue;
         send_data();
-      }
+      }*/
+      document.getElementById(data.controls.gamepad.inputs[i].elementId).setAttribute("style", "width:" + newValue + "%");
+      data.controls.gamepad.inputs[i].value = newValue;
+
     }
 
   } else {
@@ -196,6 +200,11 @@ $(document).ready(function() {
   initializeSliders();
   initializeStatus();
   initializeGamepad();
+
+  setInterval(function() {
+    send_data();
+  }, data.controls.poll_time);
+
 });
 
 
@@ -228,9 +237,15 @@ function initializeSliders() {
       }
     });
 
+    /*
+    setInterval(function() {
+        send_data();
+      }, data.controls.gamepad.poll_time)
+      */
+    /*
     slider.noUiSlider.on('change', function() {
       send_data();
-    })
+    })*/
 
   }
 
