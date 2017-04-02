@@ -1,11 +1,11 @@
 #!/usr/bin/python
-from RobotUtil import RobotUtils
-if RobotUtils.LIVE_TESTING:
-	from pwm import PWM
-	from I2C import Adafruit_I2C
-from Leg import Leg
-from Motor import Motor
-import time,math,json,sys,threading
+from Services import *
+import time
+import math
+import json
+import sys
+import threading
+import os
 from Queue import Queue,Empty
 
 class Robot():
@@ -20,7 +20,7 @@ class Robot():
 
 		self.inputQueue = Queue()
 		self.agendaThread = threading.Thread(group=None,target=self.updateAgendaLoop,name="agendaThread")
-		self.agendaThread.start()
+		#self.agendaThread.start()
 
 		self.data_file_name = RobotUtils.DATA_FILE
 
@@ -45,12 +45,12 @@ class Robot():
 		self.stop 	  	= False
 		self.autonomous = False
 
+
 		# Horizantal Video Servo Data
 		self.horizVidValue 	= 50
 		self.horizVidPin = 4
 		self.horizVidMinVal = 0
 		self.horizVidMaxVal = 100
-
 
 		# Vertical Video Servo Data
 		self.vertVidValue 	= 50
@@ -69,6 +69,7 @@ class Robot():
 
 	# loads json data and creates Leg objects with add_leg()
 	def setup(self):
+
 		with open(self.data_file_name) as data_file:
 			data = json.load(data_file)
 			constants = data["constants"]
@@ -298,10 +299,161 @@ class Robot():
 
 
 
+	def lunge(self, FRB, FRM, FRL, FLB, FLM, FLL, BLB, BLM, BLL, BRB, BRM, BRL):
+		splitNum = 10
+		for x in range(splitNum):
+			self.front_right.body.moveOffset(FRB/splitNum)
+			self.front_right.middle.moveOffset(FRM/splitNum)
+			self.front_right.leg.moveOffset(FRL/splitNum)
+
+			self.front_left.body.moveOffset(FLB/splitNum)
+			self.front_left.middle.moveOffset(FLM/splitNum)
+			self.front_left.leg.moveOffset(FLL/splitNum)
+
+			self.back_left.body.moveOffset(BLB/splitNum)
+			self.back_left.middle.moveOffset(BLM/splitNum)
+			self.back_left.leg.moveOffset(BLL/splitNum)
+
+			self.back_right.body.moveOffset(BRB/splitNum)
+			self.back_right.middle.moveOffset(BRM/splitNum)
+			self.back_right.leg.moveOffset(BRL/splitNum)
 
 
+	def forward(self):
+		velocity = .01
+		time_delay = .025
+		std_piv_step_body_delta = -20
+		std_piv_step_middle_delta = 50
+		std_piv_step_leg_delta = 5
 
-	# method to develop walking motion
+		self.front_left.standardPivotStep(std_piv_step_body_delta, std_piv_step_middle_delta, std_piv_step_leg_delta,velocity,time_delay*.01)
+		time.sleep(time_delay)
+
+		self.back_right.standardPivotStep(-std_piv_step_body_delta, std_piv_step_middle_delta, std_piv_step_leg_delta,velocity,time_delay)
+		time.sleep(time_delay)
+
+		self.back_right.standardPivotStep(-std_piv_step_body_delta, std_piv_step_middle_delta, std_piv_step_leg_delta,velocity,time_delay)
+		time.sleep(time_delay)
+
+		leg_extend_body_delta 	= 35
+		leg_extend_middle_delta = -5
+		leg_extend_leg_delta 	= 28
+
+		self.front_right.legExtend( leg_extend_body_delta, leg_extend_middle_delta, leg_extend_leg_delta, velocity, time_delay)
+		time.sleep(time_delay)
+
+		splitNum = 10
+		leg_condense_FLbody_delta = 40/splitNum
+		leg_condense_BRbody_delta = -20/splitNum
+		leg_condense_FRmiddle_delta = 20/splitNum
+		leg_condense_FRleg_delta = -28/splitNum
+		leg_condense_BLbody_delta = 20/splitNum
+		leg_condense_BLmiddle_delta = -10/splitNum
+		leg_condense_BLleg_delta = 28/splitNum
+
+
+		# condense forward right
+		for x in range(0, splitNum):
+			self.front_left.body.moveOffset(leg_condense_FLbody_delta)
+			self.back_right.body.moveOffset(leg_condense_BRbody_delta)
+			self.front_right.middle.moveOffset(leg_condense_FRmiddle_delta)
+			self.front_right.leg.moveOffset(leg_condense_FRleg_delta)
+			self.back_left.body.moveOffset(leg_condense_BLbody_delta)
+			self.back_left.middle.moveOffset(leg_condense_BLmiddle_delta)
+			self.back_left.leg.moveOffset(leg_condense_BLleg_delta)
+
+		leg_step_BLbody_delta = -30
+		leg_step_BLmiddle_delta = 30
+		leg_step_BLleg_delta = -28
+		time.sleep(time_delay)
+
+		# back left standard pivot step with mid offset"
+		self.back_left.standardPivotStepWithMidMovement(leg_step_BLbody_delta, leg_step_BLmiddle_delta, leg_step_BLleg_delta,velocity,time_delay)
+
+		leg_step_FRbody_delta = -40
+		leg_step_FRmiddle_delta = 5
+		leg_step_FRleg_delta = 28
+
+		# front left standard pivot step with mid movement"
+		self.front_left.standardPivotStepWithMidMovement(leg_step_FRbody_delta, leg_step_FRmiddle_delta, leg_step_FRleg_delta, velocity,time_delay)
+		time.sleep(time_delay)
+
+		frontRightBodySplitDiff = self.front_right.body.center_value - self.front_right.body.value
+		frontRightMiddleSplitDiff =self.front_right.middle.value - self.front_right.middle.center_value
+		frontRightLegSplitDiff = self.front_right.leg.value - self.front_right.leg.center_value
+
+		frontLeftBodySplitDiff = self.front_left.body.center_value - self.front_left.body.value
+		frontLeftMiddleSplitDiff =self.front_left.middle.center_value  - self.front_left.middle.value
+		frontLeftLegSplitDiff = self.front_left.leg.center_value - self.front_left.leg.value
+
+		backRightBodySwing = -20/splitNum
+		backRightMiddleSwing = -10/splitNum
+		backRightLegSwing = 28/splitNum
+		backLeftBodySwing = 40/splitNum
+
+		# forward condence
+		for x in range(0, splitNum):
+			self.front_right.body.moveOffset(frontRightBodySplitDiff/splitNum)
+			self.front_right.middle.moveOffset(frontRightMiddleSplitDiff/splitNum)
+			self.front_right.leg.moveOffset(frontRightLegSplitDiff/splitNum)
+
+			#self.front_left.body.moveOffset(frontLeftBodySplitDiff/splitNum)
+			self.front_left.middle.moveOffset(frontLeftMiddleSplitDiff/splitNum)
+			self.front_left.leg.moveOffset(frontLeftLegSplitDiff/splitNum)
+
+			self.back_right.body.moveOffset(backRightBodySwing)
+			self.back_right.middle.moveOffset(backRightMiddleSwing)
+			self.back_right.leg.moveOffset(backRightLegSwing)
+			self.back_left.body.moveOffset(backLeftBodySwing)
+
+		time.sleep(time_delay)
+
+		leg_step_BRbody_delta = 30
+		leg_step_BRmiddle_delta = 30
+		leg_step_BRleg_delta = -28
+		time.sleep(time_delay)
+
+		self.back_right.standardPivotStepWithMidMovement(leg_step_BRbody_delta, leg_step_BRmiddle_delta, leg_step_BRleg_delta,velocity,time_delay)
+
+		leg_extend_body_delta = 35
+		leg_extend_middle_delta =-5
+		leg_extend_leg_delta = 28
+
+		self.front_right.legExtend( leg_extend_body_delta, leg_extend_middle_delta, leg_extend_leg_delta, velocity, time_delay)
+		time.sleep(time_delay)
+
+		RlungeFLbody= 40
+		RlungeBRbody= -20
+		RlungeFRmiddle = 30
+		RlungeFRleg = -28
+		RlungeBLmiddle = -10
+		RlungeBLleg = 28
+
+		self.lunge(0,RlungeFRmiddle,RlungeFRleg,RlungeFLbody,0,0, 0,RlungeBLmiddle,RlungeBLleg,RlungeBRbody,0,0)
+
+		leg_step_BLbody_delta = -30
+		leg_step_BLmiddle_delta = 30
+		leg_step_BLleg_delta = -28
+		time.sleep(time_delay)
+
+		self.back_left.standardPivotStepWithMidMovement(leg_step_BLbody_delta, leg_step_BLmiddle_delta, leg_step_BLleg_delta,velocity,time_delay)
+
+		self.front_left.legExtend( -leg_extend_body_delta, leg_extend_middle_delta, leg_extend_leg_delta, velocity, time_delay)
+		time.sleep(time_delay)
+
+		LlungeFRbody= -40
+		LlungeBLbody= 20
+		LlungeFLmiddle = 30
+		LlungeFLleg = -28
+		LlungeBRmiddle = -10
+		LlungeBRleg = 28
+
+		self.lunge(LlungeFRbody, 0,0,0,LlungeFLmiddle,LlungeFLleg, LlungeBLbody,0,0 ,0,LlungeBRmiddle, LlungeBRleg)
+		self.reset()
+		time.sleep(10)
+		self.forward()
+
+
 	# method to develop walking motion
 	def walkInit(self):
 
@@ -525,157 +677,3 @@ class Robot():
 		else:
 			print "this print statement should never be visible. error."
 		'''
-
-	def lunge(self, FRB, FRM, FRL, FLB, FLM, FLL, BLB, BLM, BLL, BRB, BRM, BRL):
-		splitNum = 10
-		for x in range(splitNum):
-			self.front_right.body.moveOffset(FRB/splitNum)
-			self.front_right.middle.moveOffset(FRM/splitNum)
-			self.front_right.leg.moveOffset(FRL/splitNum)
-
-			self.front_left.body.moveOffset(FLB/splitNum)
-			self.front_left.middle.moveOffset(FLM/splitNum)
-			self.front_left.leg.moveOffset(FLL/splitNum)
-
-			self.back_left.body.moveOffset(BLB/splitNum)
-			self.back_left.middle.moveOffset(BLM/splitNum)
-			self.back_left.leg.moveOffset(BLL/splitNum)
-
-			self.back_right.body.moveOffset(BRB/splitNum)
-			self.back_right.middle.moveOffset(BRM/splitNum)
-			self.back_right.leg.moveOffset(BRL/splitNum)
-
-
-	def forward(self):
-		velocity = .01
-		time_delay = .025
-		std_piv_step_body_delta = -20
-		std_piv_step_middle_delta = 50
-		std_piv_step_leg_delta = 5
-
-		self.front_left.standardPivotStep(std_piv_step_body_delta, std_piv_step_middle_delta, std_piv_step_leg_delta,velocity,time_delay*.01)
-		time.sleep(time_delay)
-
-		self.back_right.standardPivotStep(-std_piv_step_body_delta, std_piv_step_middle_delta, std_piv_step_leg_delta,velocity,time_delay)
-		time.sleep(time_delay)
-
-		self.back_right.standardPivotStep(-std_piv_step_body_delta, std_piv_step_middle_delta, std_piv_step_leg_delta,velocity,time_delay)
-		time.sleep(time_delay)
-
-		leg_extend_body_delta 	= 35
-		leg_extend_middle_delta = -5
-		leg_extend_leg_delta 	= 28
-
-		self.front_right.legExtend( leg_extend_body_delta, leg_extend_middle_delta, leg_extend_leg_delta, velocity, time_delay)
-		time.sleep(time_delay)
-
-		splitNum = 10
-		leg_condense_FLbody_delta = 40/splitNum
-		leg_condense_BRbody_delta = -20/splitNum
-		leg_condense_FRmiddle_delta = 20/splitNum
-		leg_condense_FRleg_delta = -28/splitNum
-		leg_condense_BLbody_delta = 20/splitNum
-		leg_condense_BLmiddle_delta = -10/splitNum
-		leg_condense_BLleg_delta = 28/splitNum
-
-
-		# condense forward right
-		for x in range(0, splitNum):
-			self.front_left.body.moveOffset(leg_condense_FLbody_delta)
-			self.back_right.body.moveOffset(leg_condense_BRbody_delta)
-			self.front_right.middle.moveOffset(leg_condense_FRmiddle_delta)
-			self.front_right.leg.moveOffset(leg_condense_FRleg_delta)
-			self.back_left.body.moveOffset(leg_condense_BLbody_delta)
-			self.back_left.middle.moveOffset(leg_condense_BLmiddle_delta)
-			self.back_left.leg.moveOffset(leg_condense_BLleg_delta)
-
-		leg_step_BLbody_delta = -30
-		leg_step_BLmiddle_delta = 30
-		leg_step_BLleg_delta = -28
-		time.sleep(time_delay)
-
-		# back left standard pivot step with mid offset"
-		self.back_left.standardPivotStepWithMidMovement(leg_step_BLbody_delta, leg_step_BLmiddle_delta, leg_step_BLleg_delta,velocity,time_delay)
-
-		leg_step_FRbody_delta = -40
-		leg_step_FRmiddle_delta = 5
-		leg_step_FRleg_delta = 28
-
-		# front left standard pivot step with mid movement"
-		self.front_left.standardPivotStepWithMidMovement(leg_step_FRbody_delta, leg_step_FRmiddle_delta, leg_step_FRleg_delta, velocity,time_delay)
-		time.sleep(time_delay)
-
-		frontRightBodySplitDiff = self.front_right.body.center_value - self.front_right.body.value
-		frontRightMiddleSplitDiff =self.front_right.middle.value - self.front_right.middle.center_value
-		frontRightLegSplitDiff = self.front_right.leg.value - self.front_right.leg.center_value
-
-		frontLeftBodySplitDiff = self.front_left.body.center_value - self.front_left.body.value
-		frontLeftMiddleSplitDiff =self.front_left.middle.center_value  - self.front_left.middle.value
-		frontLeftLegSplitDiff = self.front_left.leg.center_value - self.front_left.leg.value
-
-		backRightBodySwing = -20/splitNum
-		backRightMiddleSwing = -10/splitNum
-		backRightLegSwing = 28/splitNum
-		backLeftBodySwing = 40/splitNum
-
-		# forward condence
-		for x in range(0, splitNum):
-			self.front_right.body.moveOffset(frontRightBodySplitDiff/splitNum)
-			self.front_right.middle.moveOffset(frontRightMiddleSplitDiff/splitNum)
-			self.front_right.leg.moveOffset(frontRightLegSplitDiff/splitNum)
-
-			#self.front_left.body.moveOffset(frontLeftBodySplitDiff/splitNum)
-			self.front_left.middle.moveOffset(frontLeftMiddleSplitDiff/splitNum)
-			self.front_left.leg.moveOffset(frontLeftLegSplitDiff/splitNum)
-
-			self.back_right.body.moveOffset(backRightBodySwing)
-			self.back_right.middle.moveOffset(backRightMiddleSwing)
-			self.back_right.leg.moveOffset(backRightLegSwing)
-			self.back_left.body.moveOffset(backLeftBodySwing)
-
-		time.sleep(time_delay)
-
-		leg_step_BRbody_delta = 30
-		leg_step_BRmiddle_delta = 30
-		leg_step_BRleg_delta = -28
-		time.sleep(time_delay)
-
-		self.back_right.standardPivotStepWithMidMovement(leg_step_BRbody_delta, leg_step_BRmiddle_delta, leg_step_BRleg_delta,velocity,time_delay)
-
-		leg_extend_body_delta = 35
-		leg_extend_middle_delta =-5
-		leg_extend_leg_delta = 28
-
-		self.front_right.legExtend( leg_extend_body_delta, leg_extend_middle_delta, leg_extend_leg_delta, velocity, time_delay)
-		time.sleep(time_delay)
-
-		RlungeFLbody= 40
-		RlungeBRbody= -20
-		RlungeFRmiddle = 30
-		RlungeFRleg = -28
-		RlungeBLmiddle = -10
-		RlungeBLleg = 28
-
-		self.lunge(0,RlungeFRmiddle,RlungeFRleg,RlungeFLbody,0,0, 0,RlungeBLmiddle,RlungeBLleg,RlungeBRbody,0,0)
-
-		leg_step_BLbody_delta = -30
-		leg_step_BLmiddle_delta = 30
-		leg_step_BLleg_delta = -28
-		time.sleep(time_delay)
-
-		self.back_left.standardPivotStepWithMidMovement(leg_step_BLbody_delta, leg_step_BLmiddle_delta, leg_step_BLleg_delta,velocity,time_delay)
-
-		self.front_left.legExtend( -leg_extend_body_delta, leg_extend_middle_delta, leg_extend_leg_delta, velocity, time_delay)
-		time.sleep(time_delay)
-
-		LlungeFRbody= -40
-		LlungeBLbody= 20
-		LlungeFLmiddle = 30
-		LlungeFLleg = -28
-		LlungeBRmiddle = -10
-		LlungeBRleg = 28
-
-		self.lunge(LlungeFRbody, 0,0,0,LlungeFLmiddle,LlungeFLleg, LlungeBLbody,0,0 ,0,LlungeBRmiddle, LlungeBRleg)
-		self.reset()
-		time.sleep(10)
-		self.forward()

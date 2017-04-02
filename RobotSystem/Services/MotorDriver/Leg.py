@@ -1,16 +1,10 @@
 from Motor import Motor
-from RobotUtil import RobotUtils
 import time,math,json
 
 class Leg(object):
 
 	def __init__(self, pwm,name, body_pin,	body_min,	body_max,	body_center, mid_horiz_value, 	middle_pin,	middle_min,	middle_max,	middle_offset_to_center, leg_horiz_value, 	leg_pin,	leg_min,	leg_max,	leg_offset_to_center):
 
-
-		self.leg_debug = RobotUtils.LEG_DEBUG
-
-		if self.leg_debug:
-			print "this should print status of leg, but is not implemented yet."
 
 		self.pwm = pwm
 

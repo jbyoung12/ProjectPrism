@@ -1,5 +1,6 @@
-from RobotUtil import RobotUtils
-import time,math
+from RobotSystem.Services.Utilities.RobotUtils import RobotUtils
+import time
+import math
 
 class Motor(object):
 
@@ -53,7 +54,7 @@ class Motor(object):
 			print "error: scaled_value < servo_min for: ",self.name
 
 		else:
-			if RobotUtils.LIVE_TESTING:
+			if self.pwm != None:
 				self.pwm.setPWM(self.pin_number, 0, scaled_value)
 
 	def moveToInT(self,val,t):
@@ -98,7 +99,7 @@ class Motor(object):
 
 		scaled_value = int(RobotUtils.scale(self.value, RobotUtils.MIN_MOTOR_VALUE, RobotUtils.MAX_MOTOR_VALUE, self.servo_min,self.servo_max))
 
-		if RobotUtils.LIVE_TESTING:
+		if self.pwm != None:
 			self.pwm.setPWM(self.pin_number, 0, scaled_value)
 
 

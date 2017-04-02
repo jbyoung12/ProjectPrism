@@ -3,12 +3,22 @@ class RobotUtils(object):
 
 	R1 				= 11.5					# length of curved leg portion of bot
 	R2 				= 6.5					# length of junction between middle and leg servos
+
+	DEG_TO_RAD		= 0.0174533				# Constant to convert degrees to radians
+
 	MAX_MOTOR_VALUE = 100					# Maximum possible motor value
 	MIN_MOTOR_VALUE = 0						# Minumum possible motor value
+
 	SERVO_MIN		= 130					# Minumum tick count for duty cycle
 	SERVO_MAX		= 570 					# Maximum tick count for duty cycle
 	FREQUENCY		= 50 					# 50 Hz creates a 20 ms period, which servos operate with
-	DATA_FILE	 	= "Controls/data.json" 	# path to data file
+	DATA_FILE	 	= "../ProjectPrism/RobotSystem/Services/MotorCalibration.json" 	# path to data file
+	# MotorCalibtration
+	# ../MotorCalibtration
+	# Services/MotorCalibtration
+	# RobotSystem/Services/MotorCalibtration
+	#
+
 	LEG_DEBUG 		= False					# Debug Legs
 	MOTOR_DEBUG 	= False					# Debug Motors
 	LIVE_TESTING	= False					# Dictates whether program is executing on robot or on a development computer
@@ -26,5 +36,6 @@ class RobotUtils(object):
 			return 0
 
 	@staticmethod
-	def scale(value, leftMin, leftMax, rightMin, rightMax):
-		return rightMin + ((float(value - leftMin) / float((leftMax - leftMin))) * (rightMax - rightMin))
+	def scale(OldValue, OldMin, OldMax, NewMin, NewMax):
+		NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
+		return NewValue
